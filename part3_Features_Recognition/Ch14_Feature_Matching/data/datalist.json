@@ -1,0 +1,20 @@
+{
+  "chapter": "14",
+  "items": [
+    {"name": "cameraman.tif", "source": "builtin", "note": "重複性與配對實驗的主要影像。角點豐富且不重複，是特徵法的舒適區"},
+    {"name": "peppers.png", "source": "builtin", "note": "影像拼接（從一張大圖切出重疊區塊，原圖即 ground truth）"},
+    {"name": "circuit.tif", "source": "builtin", "note": "SIFT 多方向指派的統計樣本；檢索資料庫來源"},
+    {"name": "fabric.png", "source": "builtin", "note": "LBP 紋理實驗與檢索資料庫"},
+    {"name": "rice.png", "source": "builtin", "note": "LBP 紋理比較"},
+    {"name": "hestain.png", "source": "builtin", "note": "LBP 紋理比較"},
+    {"name": "coins.png", "source": "builtin", "note": "練習 5 的困難檢索資料庫"},
+    {"name": "onion.png", "source": "builtin", "note": "練習 5 的困難檢索資料庫"}
+  ],
+  "notes": [
+    "本章全部使用 MATLAB 內建影像，執行 downloadCourseData 不會下載任何檔案。",
+    "**本章的核心方法是「自己造正確答案」**：所有的變換（旋轉、縮放、平移）都由程式套用，所以真實值已知，重複性、變換復原精確度、拼接誤差都能定量驗證，而不是「看起來對齊了」。",
+    "影像拼接刻意從**一張完整影像**切出重疊區塊，這樣原圖就是 ground truth，可以用 PSNR 檢驗拼接結果。",
+    "練習 5 的檢索資料庫與 fitniqe 訓練集同樣寫入 tempdir，不占 repo 空間。bagOfFeatures 的分群成本隨影像數成長很快，所以資料庫刻意控制在 24 張——再大就會讓練習跑太久。",
+    "舊教材資產 FeatureMatching.m、FeatureBasedObjectDetection.m、ExtractAndPlotHOGFeaturesExample.mlx、UseLBPFeaturesToDifferentiateImagesByTheirTextureExample.mlx 的內容已整併進本章第 5、10、11、12 節；原始 repo 未取得這些檔案，故未逐一 migrate。"
+  ]
+}

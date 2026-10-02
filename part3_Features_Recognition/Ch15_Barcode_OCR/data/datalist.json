@@ -1,0 +1,18 @@
+{
+  "chapter": "15",
+  "items": [
+    {"name": "barcodeQR.jpg", "source": "builtin", "note": "QR 碼。耐受度測試顯示它對旋轉完全免疫（0–180° 全通過）"},
+    {"name": "barcode1D.jpg", "source": "builtin", "note": "EAN-13 一維條碼。在 30°/45°/90° 全部失敗，只有 180° 例外"},
+    {"name": "businessCard.png", "source": "builtin", "note": "LayoutAnalysis 比較。多行多區塊，用 line/word 會得到 0 個字"},
+    {"name": "handicapSign.jpg", "source": "builtin", "note": "場景文字。直接 OCR vs CRAFT 兩階段的 precision/recall 比較"},
+    {"name": "fabric.png", "source": "builtin", "note": "第 9.1 節與練習 5 的強紋理背景，用來逼出兩階段的價值"}
+  ],
+  "notes": [
+    "本章全部使用 MATLAB 內建影像，執行 downloadCourseData 不會下載任何檔案。",
+    "**OCR 的 ground truth 由 insertText 合成**：文字內容是程式寫上去的，所以是精確答案。這讓 CER 曲線與失效點都能定量量測，不需要人工標註幾百張。但合成文字沒有紙張紋理、墨水暈染與光照不均，所以量到的絕對 CER 會比真實掃描樂觀——它的價值在**比較**（哪種劣化更致命、哪種前處理有效），不在預測真實世界的絕對準確率。",
+    "**繁體中文需要 Computer Vision Toolbox OCR Language Data 支援包。** 該支援包提供 64 種語言的 traineddata（含 chi_tra 與 chi_sim）；MATLAB 本體只內附 eng、jpn、seven_segment 三種。注意 API 名稱是 Model=\"chinesetraditional\"，傳檔名 \"chi_tra\" 會得到 Invalid language character vector。",
+    "**合成中文需要指定支援 CJK 的字型。** R2026a 的 insertText 預設字型 Roboto-Regular 不含中日韓字元。ch15_makeCJKImage 會依序嘗試 MingLiU、Microsoft JhengHei 等常見字型；可用字型因作業系統而異，找不到時會發警告並跳過該節。",
+    "**R2026a 已移除 ocrTrainer 與 locateText**（exist 皆回傳 0）。自訓 OCR 改用 Image Labeler + ocrTrainingData + trainOCR + evaluateOCR，本章第 8.1 節說明流程，第 17 章會回到標註工作流。",
+    "舊教材資產 LocalizeAndReadMulitpleBarcodesInAnImageExample.mlx、SP_DeepOCR.m、AOI_TextDetection.mlx、myLang/tessdata/myLang.traineddata 的內容已整併進本章。其中 myLang.traineddata 屬於舊的 Tesseract 自訓流程，在 R2026a 已無對應 API，故未 migrate。"
+  ]
+}

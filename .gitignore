@@ -1,0 +1,22 @@
+# MATLAB
+*.asv
+*.autosave
+slprj/
+sccprj/
+codegen/
+*.mex*
+
+# 建置產出（由 buildHandbook 產生，不進版控）
+build/output/
+
+# 環境檢查報告
+setup/env_report.html
+
+# 下載的資料集快取（由 downloadCourseData 管理）
+**/data/cache/
+*.zip
+
+# 作業系統
+Thumbs.db
+.DS_Store
+desktop.ini

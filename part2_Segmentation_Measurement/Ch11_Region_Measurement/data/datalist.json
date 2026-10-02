@@ -1,0 +1,12 @@
+{
+  "chapter": "11",
+  "items": [
+    {"name": "coins.png", "source": "builtin", "note": "主要量測對象。含兩種面額（nickel 21.21 mm、dime 17.91 mm），正好可以「一種當參考物、另一種做獨立驗證」"},
+    {"name": "rice.png", "source": "builtin", "note": "練習 5：沒有參考物時的量測報告"}
+  ],
+  "notes": [
+    "本章全部使用 MATLAB 內建影像，執行 downloadCourseData 不會下載任何檔案。",
+    "屬性篩選與四類形狀分離的示範用的是程式產生的合成影像（見 Ch11_Main 第 4 節與 Ch11_Solution 解答 1），不需要外部資料。這是刻意的：合成影像的真實答案已知，才能客觀檢驗篩選規則。",
+    "coins.png 的兩種硬幣真實直徑取自美國鑄幣局規格：nickel 21.21 mm、dime 17.91 mm。這兩個數字是本章所有 mm 數值的唯一來源，換影像就必須重新校正。"
+  ]
+}

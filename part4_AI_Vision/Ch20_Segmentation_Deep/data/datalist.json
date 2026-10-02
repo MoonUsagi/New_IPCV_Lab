@@ -1,0 +1,18 @@
+{
+  "chapter": "20",
+  "items": [
+    {"name": "triangleImages", "source": "builtin", "note": "vision/visiondata 下。trainingImages/trainingLabels 各 200 張、testImages/testLabels 各 100 張，32x32。**前景（triangle）只佔 4.62% 的像素**——本章第 3 節的類別不平衡示範就建立在這個比例上"},
+    {"name": "visionteam.jpg", "source": "builtin", "note": "第 6 節 SOLOv2 實例分割的示範影像。已知有 6 個人（第 16 章確認過），SOLOv2 找到 6 個 person + 1 個 frisbee 誤判"}
+  ],
+  "notes": [
+    "本章只用 MATLAB 內建資料集，執行 downloadCourseData 不會下載任何檔案。",
+    "**需要 Computer Vision Toolbox Model for SOLOv2 Instance Segmentation 支援包**（第 6 節與練習 4）。Image Processing Toolbox Model for Segment Anything Model 為選用（練習 6）。兩者缺少時對應段落會偵測並跳過。",
+    "**本章的語意分割訓練程式碼寫完整但不執行，這是一個必須說明的限制。** 與第 18、19 章不同：分類有 imagePretrainedNetwork、偵測有 yoloxObjectDetector(\"small-coco\")，而**語意分割在 R2026a 沒有可直接推論的預訓練權重**——deeplabv3plus 與 unet 只給未訓練的架構，已安裝的分割支援包只有 SOLOv2（實例分割）。加上開發機器是 T550（4.29 GB）跑不動訓練，所以本章的量化內容全部來自不需要訓練的三處：§3 類別不平衡基準、§5 指標比較、§6 SOLOv2 推論。README 末尾列出換機器後要驗證的七項。",
+    "**第 3 節的「全部猜背景」基準是本章的核心。** 它什麼都沒偵測到（triangle 的 IoU = 0），卻拿到 GlobalAccuracy 0.9538、WeightedIoU 0.9098、MeanBFScore 0.8970。只有逐類別的 IoU 講了實話。另外 triangle 的 BFScore 是 NaN，而 MeanBFScore 照樣算出 0.8970——**NaN 被靜默忽略**。加分題把「前景比例 vs 指標樂觀程度」的完整曲線畫出來：前景 0.5% 時 MeanIoU 是 0.4975，看起來像「差不多一半」但完全沒用。",
+    "**第 5 節保留了一個預期落空的實驗。** 主教材設計五種錯誤型態，預期 IoU 與 BFscore 會給出相反排序（第 17 章加分題出現過一次），**但排序完全一致**。誠實記錄下來，並改用「數值落差」說明它們仍然互補（平移 5px：Jaccard 0.5152 vs BFscore 0.1802）。**練習 1 才成功做出翻轉**——關鍵是刻意把「面積」與「邊界」分離，而且雜訊密度要夠大（0.002／0.004 不翻，0.006 以上才翻）。所以正確的結論是「指標會不會矛盾是程度問題」。",
+    "**練習 2 也推翻了一個預設立場。** 原本預期純色三角形配純色背景是 Otsu 的理想情況、門檻法應該拿 0.9 以上、結論會是「這個任務不需要深度學習」。實測 triangle 的 IoU 只有 **0.4158**（邊緣是抗鋸齒的灰階過渡，單一水平門檻切不乾淨）。所以深度學習在這個任務上確實有空間，只是本章沒有訓練來證明它。",
+    "**練習 6 的結果對 SAM 2 不利，值得留意。** imsegsam 在放大 8 倍的 256x256 合成三角形上產生 41 個遮罩，耗時 90–170 秒，而**連用 ground truth 作弊挑最好的那一個，Jaccard 也只有 0.0952**。對照練習 2 的 Otsu 門檻法：毫秒級、IoU 0.4158。基礎模型在訓練分布之外（階梯狀邊緣、無紋理、純色合成圖）會安靜地退化——與第 12 章「預設 NIQE 在工業影像上把好壞排反」同一類問題。",
+    "**imsegsam 的回傳值不是遮罩陣列**，而是一個 bwconncomp 風格的 struct（Connectivity / ImageSize / NumObjects / PixelIdxList）。直接餵給 jaccard 會報「Instead its type was struct」，遮罩要從 PixelIdxList 重建。",
+    "**deeplabv3plus 的輸入尺寸有下限**：resnet18 編碼器要求 >= [224 224]。triangleImages 原圖只有 32x32，所以用 deeplabv3plus 得放大 7 倍——放大不增加資訊，只增加 49 倍計算量。這是「用預訓練骨幹」的隱藏代價，小影像的任務用 unet 從零訓練反而合理。"
+  ]
+}

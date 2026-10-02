@@ -1,0 +1,13 @@
+{
+  "chapter": "08",
+  "items": [
+    {"name": "coins.png", "source": "builtin", "note": "雙峰直方圖，Otsu 的理想案例；也用於分水嶺示範"},
+    {"name": "rice.png", "source": "builtin", "note": "照明不均，全域 vs 自適應門檻對照"},
+    {"name": "gantrycrane.png", "source": "builtin", "note": "多階門檻與 ISODATA 參數掃描"},
+    {"name": "AT3_1m4_01.tif", "source": "builtin", "note": "細胞影像，自適應門檻的失敗案例；加分題的分水嶺計數"},
+    {"name": "hands1.jpg", "source": "builtin", "note": "彩色分割比較的來源影像"},
+    {"name": "hands1-mask.png", "source": "builtin", "note": "**標準答案遮罩**（人工標註），本章量化評估的基準"},
+    {"name": "coloredChips.png", "source": "builtin", "note": "練習 1：關鍵資訊在顏色的案例"},
+    {"name": "tissue.png", "source": "builtin", "note": "紋理分割。注意這是彩色影像，算紋理前要 im2gray"}
+  ]
+}

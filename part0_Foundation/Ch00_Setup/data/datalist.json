@@ -1,0 +1,10 @@
+{
+  "chapter": "00",
+  "items": [
+    {
+      "name": "coins.png",
+      "source": "builtin",
+      "note": "MATLAB 內建影像，用於環境驗證"
+    }
+  ]
+}

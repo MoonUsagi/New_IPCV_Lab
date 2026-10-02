@@ -1,0 +1,7 @@
+{
+  "chapter": "04",
+  "items": [
+    {"name": "cameraman.tif", "source": "builtin", "note": "本章主要測試影像，兼有平坦區域與細節"},
+    {"name": "coloredChips.png", "source": "builtin", "note": "練習 5 的分割測試"}
+  ]
+}

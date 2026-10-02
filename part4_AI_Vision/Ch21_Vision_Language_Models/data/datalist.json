@@ -1,0 +1,20 @@
+{
+  "chapter": "21",
+  "items": [
+    {"name": "DigitDataset", "source": "builtin", "note": "與第 18 章**同一批測試集**（rng(0)、每類 60 張再切 0.67），這樣零樣本 0.49 與特徵抽取 0.85 可以直接比較"},
+    {"name": "peppers.png", "source": "builtin", "note": "Moondream 圖說示範。輸出：\"A purple tablecloth holds a vibrant array of red, green, yellow, and white peppers, onions, and garlic...\"，描述正確"},
+    {"name": "visionteam.jpg", "source": "builtin", "note": "Moondream 圖說第二例。它**數對了人數（six individuals）**，而那是第 20 章要用實例分割才做得到的事"},
+    {"name": "vehicles/ + stopSignImages/", "source": "builtin", "note": "練習 2 的自然照片對照組（各 41 張）。零樣本準確率 0.8415，與手寫數字的 0.18 形成領域距離的對照，且**沒有撞到天花板**"}
+  ],
+  "notes": [
+    "本章全部使用 MATLAB 內建資料集，執行 downloadCourseData 不會下載任何檔案。",
+    "**需要三個支援包**：Computer Vision Toolbox Model for OpenAI CLIP Network、Computer Vision Toolbox Model for moondream Vision Language Model、Computer Vision Toolbox Model for Grounding DINO Object Detection（後者為選用，第 17 章已用）。",
+    "**支援包的偵測方式與前面各章不同，這一點要特別說明。** 先前的做法是查 matlab.addons.installedAddons，但實測發現它會漏：CLIP 與 moondream 都能正常運作，卻不一定出現在清單裡（moondream 的清單名稱還是小寫的 moondream）。所以本章改用 probeModel 這個區域函式，以**實際呼叫**判斷——真的缺套件會丟 nnet_cnn:supportpackages:InstallRequired，引數寫錯則是一般的 mustBeMember／TooManyInputs。兩者要分開，才不會把「我引數傳錯」誤判成「套件沒裝」。",
+    "**本章刻意與第 18 章共用測試集。** 零樣本 0.49 vs 特徵抽取 0.85 這個比較是本章最重要的數字，只有在同一批資料上才有意義。第 18 章 §6.1 量到重跑的雜訊是 2–5 個百分點，而這裡的差距是 36 個百分點——遠超過雜訊，結論站得住。",
+    "**第 5 節的「相似度窄帶」在練習 2 得到了更好的解釋。** 主教材量到手寫數字上相似度全距只有 0.0634、前二名差距中位數 0.0068，並據此說「餘弦相似度不能當信心分數」。練習 2 在自然照片上量到全距 0.1879、差距 0.0395（大 6 倍），顯示**窄帶本身是領域不匹配的症狀，不是 CLIP 的固有性質**。這個修正寫在練習 2 的解答裡。",
+    "**練習 4 推翻了主教材 §7 的一個推論。** §7 觀察到 \"a round shape\" 檢索全對而 \"the digit zero\" 全錯，據此建議「用外觀描述而不是類別代號」。練習 4 對十個類別系統性地比較，平均 P@5 **完全打平（0.200 vs 0.200）**，逐類別差異卻極大（類別 0 外觀式 +0.60、類別 6 −0.60）。所以 §7 的觀察是對的但範圍有限——那是一個「類別 0 的現象」，不是通則。兩處的敘述都已標明這個限制。",
+    "**練習 3 的校準實驗得到一個負面結果，而它是刻意保留的。** 校準集上選出的拒絕門檻達到 0.875 準確率，搬到評估集只剩 0.500——門檻完全沒有轉移。原因是校準集只有 30 張，而在窄帶分布下門檻附近的樣本極密集。這正好示範了為什麼校準集與評估集必須分開（第 16 章練習 3 的同一原則）。",
+    "**練習 5 的誤差分解修正了「零樣本為什麼差」的解釋。** 原本的說法是「領域距離遠」，分解之後更精確：零樣本 0.49 → CLIP 嵌入+SVM 0.60（文字端損失 +0.11）→ ResNet-18 特徵+SVM 0.85（影像端落差 +0.25）。**影像端的問題還比較大。** 注意快速模式下 CLIP 只用 120 張訓練而第 18 章用 400 張，完整執行時比例可能改變，解答裡已標明。",
+    "第 8 節的 Moondream 每張約 14–17 秒（含模型載入），所以在 ipcvFast 模式下跳過。CLIP 的影像嵌入約 0.20–0.24 秒／張。"
+  ]
+}

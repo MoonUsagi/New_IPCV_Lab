@@ -1,0 +1,10 @@
+{
+  "chapter": "09",
+  "items": [
+    {"name": "coloredChips.png", "source": "builtin", "note": "主要示範影像，教材中縮為 50% 以控制 SAM 的執行時間"},
+    {"name": "hands1.jpg", "source": "builtin", "note": "與第 08 章傳統方法正面比較"},
+    {"name": "hands1-mask.png", "source": "builtin", "note": "標準答案遮罩"},
+    {"name": "kobi.png", "source": "builtin", "note": "練習 2：較複雜的影像"},
+    {"name": "SAM 2 模型權重", "source": "builtin", "note": "由 Image Processing Toolbox Model for Segment Anything Model 2 支援包提供，首次使用時自動下載並快取"}
+  ]
+}

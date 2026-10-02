@@ -1,0 +1,17 @@
+# 純文字 Live Code 教材：以文字方式 diff
+*.m text eol=lf diff=matlab
+
+# 二進位 Live Script（本課程不使用，保留規則以防萬一）
+*.mlx binary
+*.mlapp binary
+*.mat binary
+*.fig binary
+
+# 教材素材以 Git LFS 管理
+*.png  filter=lfs diff=lfs merge=lfs -text
+*.jpg  filter=lfs diff=lfs merge=lfs -text
+*.jpeg filter=lfs diff=lfs merge=lfs -text
+*.tif  filter=lfs diff=lfs merge=lfs -text
+*.bmp  filter=lfs diff=lfs merge=lfs -text
+*.mp4  filter=lfs diff=lfs merge=lfs -text
+*.avi  filter=lfs diff=lfs merge=lfs -text

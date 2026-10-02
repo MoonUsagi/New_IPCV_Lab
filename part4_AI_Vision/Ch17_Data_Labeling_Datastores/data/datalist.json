@@ -1,0 +1,20 @@
+{
+  "chapter": "17",
+  "items": [
+    {"name": "DigitDataset", "source": "builtin", "note": "nnet/nndemos/nndatasets 下的 10 類手寫數字，每類 1000 張。用於 imageDatastore 與 countEachLabel。**刻意做成完全平衡（不平衡比 1.00）**，真實資料不會這樣，所以第 3 節自己做了一個不平衡子集（多數類 69.0%）"},
+    {"name": "triangleImages", "source": "builtin", "note": "vision/visiondata 下。trainingImages 200 張 .jpg + trainingLabels 200 張 .png，testImages/testLabels 各 100 張。用於 pixelLabelDatastore 與擴增同步檢查。**標籤 PNG 裡 255 = triangle（佔 2.9%）、0 = background**"},
+    {"name": "triangleGroundTruth.mat", "source": "builtin", "note": "第 7 節的 groundTruth 範例。**它存的是 MathWorks 建置機器的絕對路徑**（/mathworks/devel/sbs/37/...），載入時會發兩個警告——這是 changeFilePaths 的真實教材"},
+    {"name": "vehicleTrainingData.mat + vehicles/", "source": "builtin", "note": "295 張車輛影像與邊界框標註。用於 boxLabelDatastore、資料切分實驗與 Grounding DINO 自動標註評估"},
+    {"name": "visionteam.jpg", "source": "builtin", "note": "第 12 節 Grounded SAM 的示範影像（6 個人），以及練習 4 的跨類別提示詞驗證"}
+  ],
+  "notes": [
+    "本章全部使用 MATLAB 內建資料集，執行 downloadCourseData 不會下載任何檔案。",
+    "**需要兩個支援包**：Computer Vision Toolbox Model for Grounding DINO Object Detection（第 9–12 節與練習 4、加分題）與 Image Processing Toolbox Model for Segment Anything Model（第 12 節與加分題）。兩者缺少時對應段落會偵測並跳過，並印出訊息，所以 verifyChapters 在沒裝支援包的機器上仍會通過。",
+    "**自動標註的評估用「已知答案」的資料集**：vehicleTrainingData.mat 有人工標註的框，所以 Grounding DINO 的輸出可以直接用 evaluateObjectDetection 量出 precision／recall／AP，不需要另外標註。這是本章能把「提示詞是超參數」定量呈現的前提。",
+    "**必須說明的取樣決定**：第 10 節的提示詞掃描用 `round(linspace(1, 295, 20))` 均勻取樣，**不是取開頭的連續 20 張**。因為第 6 節已經量到這個資料集有 33% 的影像存在近重複，連續取樣會讓同一個場景重複計入，把 precision／recall 都算歪。",
+    "**triangleImages 有兩套互相矛盾的 labelIDs 慣例。** trainingLabels/ 的 PNG 是 255=triangle；而同一個資料夾下的 triangleGroundTruth.mat 的 LabelDefinitions 寫 triangle→0。兩者並不矛盾（groundTruth 指的是它自己的 PixelLabelData 檔案，來自影片來源、用另一套編碼），但這正好說明**labelIDs 不能從別處複製，一定要對著手上那批檔案驗證**。第 2 節給出了驗證方法，練習 1 把它寫成函式。",
+    "**加分題的負面結果值得留意**：SAM 在放大 8 倍的合成三角形上，即使給完美的人工框，Jaccard 也只有 0.517。誤差分解顯示框只貢獻 15%、SAM 本身的上限貢獻 85%。基礎模型在訓練分布之外會安靜地退化——與第 12 章「預設 NIQE 在工業影像上把好壞排反」是同一類問題。",
+    "第 10 節與練習 4 的絕對秒數依機器而異（T550 上約 1.8 秒／張）。教材的結論都寫成 precision／recall／AP 的比較，那些不隨機器改變。",
+    "**ViT 未納入本章或第 18 章的可執行段落。** Computer Vision Toolbox Model for Vision Transformer Network 已安裝，但函式名稱是 visionTransformer；而 `which(\"vit\")` 會解析到 Communications Toolbox 的 comm/commmex/vit.mexw64（Viterbi 解碼器），存在名稱衝突。若要在教材裡用 ViT，必須明確呼叫 visionTransformer 並在註解裡說明這個衝突。"
+  ]
+}

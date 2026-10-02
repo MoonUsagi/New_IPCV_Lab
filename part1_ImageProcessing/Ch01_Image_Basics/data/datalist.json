@@ -1,0 +1,20 @@
+{
+  "chapter": "01",
+  "items": [
+    {
+      "name": "peppers.png",
+      "source": "builtin",
+      "note": "彩色影像，用於 RGB 通道與色彩空間示範"
+    },
+    {
+      "name": "coins.png",
+      "source": "builtin",
+      "note": "灰階影像，用於二值化示範"
+    },
+    {
+      "name": "cameraman.tif",
+      "source": "builtin",
+      "note": "灰階影像，用於資料型別示範"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "chapter": "13",
+  "items": [
+    {"name": "peppers.png", "source": "builtin", "note": "修復實驗的主要影像（紋理豐富）；也當合成的前景物件來源"},
+    {"name": "pout.tif", "source": "builtin", "note": "練習 1 的對照影像（大片平滑）。與 peppers 對比才看得出方法選擇隨內容改變"},
+    {"name": "saturn.png", "source": "builtin", "note": "混合與合成的背景。亮度與色調都與 peppers 明顯不同，接縫才看得出來"},
+    {"name": "football.jpg", "source": "builtin", "note": "加分題的「真實領域」樣本之一"},
+    {"name": "fabric.png", "source": "builtin", "note": "加分題的真實領域樣本"},
+    {"name": "greens.jpg", "source": "builtin", "note": "加分題的真實領域樣本"},
+    {"name": "hestain.png", "source": "builtin", "note": "加分題的真實領域樣本"},
+    {"name": "onion.png", "source": "builtin", "note": "加分題的真實領域樣本"},
+    {"name": "yellowlily.jpg", "source": "builtin", "note": "加分題的真實領域樣本"}
+  ],
+  "notes": [
+    "本章全部使用 MATLAB 內建影像，執行 downloadCourseData 不會下載任何檔案。",
+    "合成資料集與 fitniqe 訓練集都由程式產生後寫入 tempdir，不占用 repo 空間。加分題的真實領域清單用 try/catch 逐張讀取，某個 MATLAB 版本缺少其中一張時會自動跳過。",
+    "第 3 節的修復評估採「從完好影像挖洞再修，以原圖為 ground truth」。這是本章能給出定量結論的前提——沒有正確答案就只能說「看起來不錯」。",
+    "**注意 R2026a 的 insertText 預設字型是 Roboto-Regular，不含中日韓字元。** 傳中文標籤會發出 'default font does not contain one or more characters' 警告並顯示為缺字。練習 3 的標註因此使用 ASCII 標籤。要顯示中文須用 Font 參數指定支援 CJK 的字型檔。",
+    "舊教材資產 SP_Image_In_Painting.m 的流程已由 code/ch13_inpaintCompare.m 取代並加上定量評估；原始 repo 未取得該檔，故未migrate。"
+  ]
+}

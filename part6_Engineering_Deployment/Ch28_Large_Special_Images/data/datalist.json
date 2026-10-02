@@ -1,0 +1,23 @@
+{
+  "chapter": "28",
+  "items": [
+    {"name": "peppers.png（放大 2 倍與 4 倍）", "source": "builtin", "note": "§2–§3 與練習 1、2 的分塊測試影像。2048x1536 放得進記憶體，用來和整張處理的結果逐像素比對"},
+    {"name": "（合成）8192x8192 大影像", "source": "generated", "note": "ch28_makeLargeImage 在磁碟上逐塊產生，整張從不進記憶體。低頻正弦背景 + 雜訊 + 12 個亮斑，其中 6 個刻意壓在塊邊界上；INFO.Spots 回傳真值中心。檔案 70 MB，blockedImage 物件本身 8 bytes"},
+    {"name": "CT-MONO2-16-ankle.dcm", "source": "builtin", "note": "CT 踝關節 512x512 int16。儲存值 32..4080，RescaleIntercept -1024，轉換後 -992..3056 HU。**沒有 PixelSpacing**"},
+    {"name": "knee1.dcm", "source": "builtin", "note": "MR 膝關節 512x512 uint16，PixelSpacing 0.3125 mm（視野 16 公分，通過合理性檢查）"},
+    {"name": "US-PAL-8-10x-echo.dcm", "source": "builtin", "note": "超音波 430x600x1x10——第四維是時間（10 幀）。沒有 rescale 也沒有 PixelSpacing"},
+    {"name": "brain.nii / mri.mat", "source": "builtin", "note": "256x256x21 與 128x128x27 的腦部體積。間距都是 [1 1 1]，但層方向只有 2.1 / 2.7 公分，裝不下一顆腦——標頭是預設值不是量測值"},
+    {"name": "paviaU.dat / paviaU.mat / paviauRoofingGT.mat", "source": "support package", "note": "Hyperspectral Imaging Library 附的 Pavia University，610x340x103，430–838 nm。paviaU.mat 附 9 類材料光譜；paviauRoofingGT.mat 是屋頂的二值真值（2275 個像素，1.1%），全部集中在第 108–182 欄的同一棟建物"}
+  ],
+  "notes": [
+    "本章不需要外部下載。§7 需要 Hyperspectral Imaging Library for Image Processing Toolbox 支援包（已安裝），§6 的 medicalVolume 需要 Medical Imaging Toolbox（已安裝）。",
+    "**§3 與練習 1 找出分塊處理的兩個對齊條件**：塊與塊之間靠 BorderSize（要涵蓋整個運算鏈的影響範圍，高斯是 ceil(2σ)、開運算是 2×鄰域半寬），影像外緣靠 PadMethod 模擬原函式的補邊方式。高斯剛好兩者預設都是 replicate 所以沒問題；imopen 要 symmetric；imfilter 與 medfilt2 預設補 0 所以要 PadMethod=0。規則是實測出來的，不是從文件讀的。",
+    "**我原本會寫錯的兩件事都留在教材裡**：(1) strel(\"disk\",5) 的鄰域是 9x9（半寬 4），因為近似分解；(2) 以為 block.Start 是核心起點——實測設了 BorderSize 後 Start/End 是含邊界的範圍，錯的話每個偵測都偏 b·√2（64 → 91.8 像素）。",
+    "**§5 的跨界目標實驗**：Border=0 時 7/12 配到且邊界斑錯位 24.5 px；Border=64 時位置對了但有 4 個重複；Border=64 + 只留核心時 9 個偵測全部正確。剩下 3 個漏掉的全部在背景 71–76 的暗區，峰值低於門檻 170，三種設定都一樣——那是全域門檻問題，不是分塊問題。教材在主文中現場驗證這件事。",
+    "**§7 與練習 4 是第 20 章類別不平衡的延續**：屋頂只佔 1.1%，五種光譜比對方法的 AUC 都 ≥ 0.975，但召回 90% 時精確率從 0.792（sidsam）到 0.261（ns3）。分數範圍差五個數量級（jmsam 最大 0.036、ns3 最大 4424），跨方法套同一個門檻會得到 0% 或 100%。同方法跨區域時召回率移轉得過去但精確率不行：切點從 150 移到 170 欄，sam 的精確率從 0.647 掉到 0.280，因為右半的盛行率變了。",
+    "**練習 4 記錄了一個我自己犯的切分錯誤**：第一次上下切（第 305 列），屋頂全部在上半部，下半部沒有正樣本，召回率是 NaN。修正是先查正樣本的空間分布再決定切點。",
+    "**§6 與練習 3、5 是第 25–27 章「外部長度」結論的延續**：DICOM 的 rescale 與 PixelSpacing、體積的體素間距都是從外面來的資訊，檔案沒有或只給預設值時，所有量測差一個偏移或比例。能做的是用已知物理事實做合理性檢查：CT 裡一定有約 -1000 HU 的空氣、一顆頭大約 15x18x13 公分、膝關節 MR 視野 14–18 公分。",
+    "**R2026a API 注意事項**：apply 的函式不能回傳 cell；apply 的結果按塊的位置拼接，每塊 N×2 的輸出要奇偶欄分開取；makeMultiLevel2D 預設寫到「原檔名_multiLevel.tiff」且拒絕覆寫，要給 OutputLocation；imhypercube 回傳 hyper.io.hypercube，colorize 是它的方法；光譜比對函式都是越小越像。第一次對新的 blockedImage 物件呼叫 apply 有初始化成本，計時前要熱身。",
+    "**沒有驗證的部分**：真正的 WSI 病理切片（SVS/NDPI，數十 GB）沒有資料；Volume Viewer APP 的新功能、DICOM Browser、Medical Image Labeler 都是互動式；volshow 能建立物件但畫面無法自動驗證。"
+  ]
+}

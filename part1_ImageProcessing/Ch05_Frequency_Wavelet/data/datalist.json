@@ -1,0 +1,7 @@
+{
+  "chapter": "05",
+  "items": [
+    {"name": "cameraman.tif", "source": "builtin", "note": "本章主要影像。強邊緣多，適合觀察振鈴假影"},
+    {"name": "peppers.png", "source": "builtin", "note": "彩色 notch 濾波測試"}
+  ]
+}

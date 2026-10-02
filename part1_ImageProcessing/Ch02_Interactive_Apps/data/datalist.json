@@ -1,0 +1,15 @@
+{
+  "chapter": "02",
+  "items": [
+    {
+      "name": "coloredChips.png",
+      "source": "builtin",
+      "note": "彩色圓片影像。本章的主要任務影像：找出紅色圓片並計數"
+    },
+    {
+      "name": "ch02_chips_dataset",
+      "source": "builtin",
+      "note": "由 coloredChips.png 在 Ch02_Main 執行時即時合成的 6 張變異影像（旋轉/明暗/雜訊/模糊），寫入 tempdir，不佔版本庫"
+    }
+  ]
+}

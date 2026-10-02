@@ -1,0 +1,19 @@
+{
+  "chapter": "16",
+  "items": [
+    {"name": "visionteam.jpg", "source": "builtin", "note": "Viola-Jones 人臉。6 張臉，框寬 35–45 像素。第 2、3 節的參數掃描與練習 2 的「先量再設」都用它"},
+    {"name": "visionteam1.jpg", "source": "builtin", "note": "ACF 行人偵測（第 4 節）與練習 2 的跨影像驗證。FrontalFaceLBP 在這張上只找到 1 張臉"},
+    {"name": "stopSignsAndCars.mat", "source": "builtin", "note": "練習 4 的 cascade 自訓資料集。41 張影像，含 stopSign / carRear / carFront 三欄標註。**imageFilename 是相對路徑且已含 stopSignImages/ 子資料夾**"},
+    {"name": "stopSignTest.jpg", "source": "builtin", "note": "練習 4 的獨立測試影像（沒有參與訓練）"},
+    {"name": "nonStopSigns/", "source": "builtin", "note": "練習 4 的負樣本資料夾，只有 5 張影像。訓練訊息顯示每一級只能取到 84 個負樣本——這就是「41 個正樣本不夠」的直接證據"}
+  ],
+  "notes": [
+    "本章全部使用 MATLAB 內建影像與資料集，執行 downloadCourseData 不會下載任何檔案。",
+    "**HOG + SVM 的訓練集與測試場景都是合成的**（ch16_makePatchSet 與 ch16_makeSceneWithTruth，固定 rng）。這是刻意的：場景是程式畫的，所以**每個目標的框都是精確已知的 ground truth**，precision 與 recall 可以直接算，不需要人工標註。第 6 節「100% patch 準確率 → 0.8% 偵測器 precision」這個結論就是靠這一點才能定量呈現。",
+    "**合成也帶來一個必須誠實說出來的代價。** 練習 1 的四類版本之所以能達到 100%，是因為背景 patch 的三種設計是照著 ch16_makeSceneWithTruth 的已知行為設計的——**設計者有內線消息**。練習 5 的「候選區域」手段能拿到 20–30 倍加速且零精確度損失，也是因為背景固定 0.9、物件固定 0.15，一個全域門檻就能完美切出候選。真實影像上這兩件事都會退化。所以本章的合成實驗價值在**比較與機制**（哪個指標會騙人、哪種補救有效），不在預測真實世界的絕對數字。",
+    "**主教材第 7 節有一個刻意留下的方法論瑕疵**：硬負樣本在同一張場景上挖掘、然後在同一張場景上評估，那是資料洩漏。練習 3 用五折交叉驗證量出代價：precision 高估 20.0 個百分點，而標準差從 ± 44.7 被壓成 ± 0.0。留在主教材裡是為了讓練習 3 有東西可修——與第 12 章練習 3 的留出測試集是同一個原則。",
+    "**R2026a 的 trainCascadeObjectDetector 不接受含路徑的輸出檔名**（必須是純檔名，要換資料夾只能先 cd）。**vision.CascadeObjectDetector 的 MinSize 有硬性下限**，等於模型的訓練尺寸（FrontalFaceLBP 是 [24 24]），設更小直接報錯——所以「把 MinSize 寫成影像尺寸的比例」這個常見建議只在放大的方向有效。",
+    "第 8 節的絕對秒數依機器而異（同一台機器兩次執行差到 2 倍）。教材裡的結論都寫成**比值**（每千個視窗的秒數、加速倍數、與 FrontalFaceLBP 的倍率），那些跨機器才站得住。",
+    "舊教材 14.Object_Detection 的深度學習部分不在本章，移到第 19 章。"
+  ]
+}

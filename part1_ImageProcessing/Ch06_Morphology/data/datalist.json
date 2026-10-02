@@ -1,0 +1,9 @@
+{
+  "chapter": "06",
+  "items": [
+    {"name": "blobs.png", "source": "builtin", "note": "二值影像，白色物件佔 15.6%。注意：不需 imcomplement"},
+    {"name": "rice.png", "source": "builtin", "note": "不均勻背景，top-hat 的主要示範"},
+    {"name": "cameraman.tif", "source": "builtin", "note": "灰階形態學與形態學梯度"},
+    {"name": "printedtext.png", "source": "builtin", "note": "加分題：文字行與字元切割"}
+  ]
+}

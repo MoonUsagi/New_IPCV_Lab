@@ -1,0 +1,14 @@
+{
+  "chapter": "03",
+  "items": [
+    {"name": "pout.tif", "source": "builtin", "note": "低對比灰階影像，直方圖診斷與對比拉伸的主要範例"},
+    {"name": "moon.tif", "source": "builtin", "note": "明暗差異極大，用於 histeq 與 CLAHE 的對比"},
+    {"name": "tire.tif", "source": "builtin", "note": "偏暗影像，練習 1 使用"},
+    {"name": "AT3_1m4_01.tif", "source": "builtin", "note": "細胞影像，練習 1 使用"},
+    {"name": "rice.png", "source": "builtin", "note": "不均勻光場，imflatfield 示範"},
+    {"name": "lowlight_1.jpg", "source": "builtin", "note": "低光源增強示範"},
+    {"name": "foggysf1.jpg", "source": "builtin", "note": "去霧示範，教材中會縮小為 25% 以加快速度"},
+    {"name": "coloredChips.png", "source": "builtin", "note": "彩色增強與色相偏移量化"},
+    {"name": "peppers.png", "source": "builtin", "note": "imblend 混合示範的來源影像"}
+  ]
+}

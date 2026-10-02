@@ -1,0 +1,10 @@
+{
+  "chapter": "10",
+  "items": [
+    {"name": "circuit.tif", "source": "builtin", "note": "邊緣算子比較的主要影像，直線結構豐富"},
+    {"name": "coins.png", "source": "builtin", "note": "霍夫圓偵測；半徑範圍敏感度測試"},
+    {"name": "worms.tif", "source": "local", "note": "原版教材資產：線蟲原始影像（16 位元）"},
+    {"name": "wormsBW1.png", "source": "local", "note": "原版教材資產：線蟲二值影像樣本 1"},
+    {"name": "wormsBW2.png", "source": "local", "note": "原版教材資產：線蟲二值影像樣本 2。用於示範 API 更新導致門檻失效"}
+  ]
+}

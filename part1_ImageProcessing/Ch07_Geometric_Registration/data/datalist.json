@@ -1,0 +1,9 @@
+{
+  "chapter": "07",
+  "items": [
+    {"name": "cameraman.tif", "source": "builtin", "note": "已知轉換的合成配準案例，可驗證回復參數的準確度"},
+    {"name": "westconcordorthophoto.png", "source": "builtin", "note": "多模態配準的參考影像（正射影像）"},
+    {"name": "westconcordaerial.png", "source": "builtin", "note": "多模態配準的待配準影像（空拍）"},
+    {"name": "rice.png", "source": "builtin", "note": "練習 5：用完全無關的影像測試非剛性配準的危險"}
+  ]
+}

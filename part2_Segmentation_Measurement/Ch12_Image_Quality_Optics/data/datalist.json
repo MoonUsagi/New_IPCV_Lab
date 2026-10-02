@@ -1,0 +1,21 @@
+{
+  "chapter": "12",
+  "items": [
+    {"name": "peppers.png", "source": "builtin", "note": "全參考與無參考指標的主要測試影像。自然照片，落在 NIQE/BRISQUE 的訓練分布內"},
+    {"name": "colorCheckerTestImage.jpg", "source": "builtin", "note": "第 9 節色彩準確度量測。注意這張影像曝光偏亮，ΔE 有 89% 來自亮度而非色偏"},
+    {"name": "cameraman.tif", "source": "builtin", "note": "第 5 節跨領域比較"},
+    {"name": "text.png", "source": "builtin", "note": "第 5 節的關鍵反例：完全清晰卻得到 NIQE 39.62。注意它是 logical，im2gray 不吃"},
+    {"name": "coins.png", "source": "builtin", "note": "第 5 節；加分題的下游計數任務"},
+    {"name": "rice.png", "source": "builtin", "note": "第 5 節跨領域比較（乾淨卻 NIQE 26.90）"},
+    {"name": "circuit.tif", "source": "builtin", "note": "第 5 節跨領域比較"},
+    {"name": "westconcordorthophoto.png", "source": "builtin", "note": "第 5 節跨領域比較"},
+    {"name": "pout.tif", "source": "builtin", "note": "第 5 節：NIQE 3.73（好）但 BRISQUE 42.82（差），兩個指標互相矛盾的例子"}
+  ],
+  "notes": [
+    "本章全部使用 MATLAB 內建影像，執行 downloadCourseData 不會下載任何檔案。",
+    "**eSFRTestImage.jpg 不在 R2026a 的 Image Processing Toolbox 內建影像中**（本機實測 exist 回傳 0），所以本章無法示範 esfrChart + measureSharpness 的完整流程。第 8 節改用 ch12_makeSlantedEdge 產生合成斜邊、ch12_measureMTF 自行實作斜邊法，流程與圖卡量測相同且可用理論值驗證。要做可追溯的鏡頭驗收，仍需購買實體 eSFR 圖卡並拍攝。",
+    "imdata 資料夾中只有 eSFRdefaultColorReference.mat 與 eSFRdefaultGrayReference.mat 兩個參考資料檔，沒有圖卡照片本身。",
+    "第 7 節的 fitniqe 訓練集由 ch12_makeWaferLike 程式產生（24 張，固定種子），寫入 tempdir，不占用 repo 空間。",
+    "第 10 節需要 Optical Design and Simulation Library for Image Processing Toolbox 支援包；未安裝時該節會自動跳過。玻璃資料來自支援包內附的 SCHOTT / HIKARI / OHARA / SUMITA / CDGM / EDMUNDOPTICS 目錄，共 1775 種玻璃。"
+  ]
+}

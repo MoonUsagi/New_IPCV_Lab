@@ -1,0 +1,23 @@
+{
+  "chapter": "24",
+  "items": [
+    {"name": "singleball.mp4", "source": "builtin", "note": "承接第 23 章的主線。45 幀，球在 27–33 幀被紙箱遮住。本章 §3–§5 用它示範 Kalman 補洞（盲飛 10 幀）、運動模型比較、KLT 的失敗。球在遮擋前後的速度是 21.10 與 11.44 px/幀——等速假設不成立，這是 §4 的核心"},
+    {"name": "atrium.mp4", "source": "builtin", "note": "640x360、600 幀。§7 的背景相減與加分題的真實多物件追蹤。訓練 50 幀後每幀偵測數中位數 2、最多 5；286 幀有 2 個以上物體，最長連續區段 81 幀（260–340）"},
+    {"name": "cameraman.tif", "source": "builtin", "note": "練習 4 用 imtranslate 造出精確已知的位移來驗證光流。這是本章唯一有像素級真值的光流測試"},
+    {"name": "（合成）交會場景", "source": "generated", "note": "ch24_crossingScene 產生，兩個物體 + 逐幀身分真值。**這是本章唯一能量出 ID 切換的地方。** 兩種情境：cross（反向穿越，Kalman 的速度預測就分得開）與 meet（相遇、停留、各自折返，等速模型方向猜反）。難度旋鈕是 MissDistance（兩條軌跡的垂直間距），小於 2*Radius 時兩者併成一個區塊"},
+    {"name": "peppers.png / football.jpg / coins.png / cameraman.tif / onion.png / tape.png", "source": "builtin", "note": "§11 用六張完全不相干的影像量未訓練 ReID 的餘弦相似度，得到 0.9958–0.9989（全距 0.003）"}
+  ],
+  "notes": [
+    "本章不需要外部資料集，執行 downloadCourseData 不會下載任何檔案。",
+    "**opticalFlowRAFT 需要 Computer Vision Toolbox Model for RAFT Optical Flow Estimation 支援包，本機未安裝。** ch24_flowCompare 在缺少時不會中斷，只把該列的 Available 標成 false 並印一行訊息，其餘四種傳統方法照常比較。裝好後該列會自動有數字。",
+    "**課綱寫的兩個函式在 R2026a 不存在**：assignDetectionsToTrackID（正確名稱是 assignDetectionsToTracks）與 deepSORTTracker（沒有現成物件，DeepSORT 要用 Kalman + 匈牙利 + reidentificationNetwork 自己組）。",
+    "**ReID 沒有預訓練權重。** reidentificationNetwork(backbone, classNames) 的 backbone 必須是 dlnetwork，要自己從 imagePretrainedNetwork 接。訓練需要 GPU 與身分標註資料集，ch24_reidSketch 的 DoTrain 預設是 false，只印出程式碼。未訓練的嵌入實測對六張不相干影像給出 0.9958–0.9989 的相似度（全距 0.003），完全沒有身分區辨力——和第 21 章 CLIP 的窄帶現象相同。",
+    "**練習 2 推翻了主教材 §4 的結論，兩者都保留。** §4 在一段 7 幀盲飛上量到 ConstantAcceleration 好 10.7 倍（31.65 → 2.95 px）；練習 2 在可見段內製造 1–6 幀的盲飛，發現交叉點在第 2–3 幀之間，盲飛 5 幀時 CA 的誤差是 255.32 px 而 CV 只有 36.08。原因是等速誤差隨 t 線性成長、等加速隨 t^2 成長，而且加速度是二階差分雜訊被放大兩次。§4 那段之所以 CA 贏，是因為它前面有 14 幀連續可見資料把加速度估準了（練習 2 只有 2 幀）。",
+    "**練習 3 找到一個比「追丟」危險得多的失敗。** 加上官方範例的 KLT 重新偵測機制後，有點的幀數從 9/29 變成 29/29，看起來修好了；但實際上第 26 幀重新偵測抓到的是背景紋理，之後 5 個點固定在 (289.4, 247.0) 一動也不動，到第 42 幀時離真實球位置 188.6 像素，而 nValid 一路回報 5、雙向誤差檢查也完全滿意。追蹤器的每一個內部指標都顯示正常。結論：追蹤器自己的指標永遠不會告訴你它跟丟了，要和獨立偵測器比對。",
+    "**練習 4 記錄了我自己犯的一個評估錯誤。** 第一次用全畫面內部取中位數，opticalFlowLK 與 opticalFlowLKDoG 在所有位移下都是 0.000，差點寫成「完全失效」。真相是 LK 只在約 33% 的像素上有輸出（孔徑問題：平坦區的結構張量奇異，函式回傳 0），全畫面中位數被稀釋。改用高梯度前 10% 的像素後，LK 在 1 px 位移時是 0.920、很準，之後單調崩潰到 20 px 時的 0.005。這和第 13 章「評估區域跟著自變數變動導致結論反向」是同一類錯誤。",
+    "**§10 是本章的量化核心**：兩個物體被偵測成一個區塊時，外觀權重（0→0.9 讓 ID 切換從 3 變 4，更糟）、軌跡壽命（2→15 全是 3）、運動模型（CV→CA 從 3 變 4）三個補救手段全部無效；唯一有效的是讓偵測端分得開（間距 12→30，ID 切換 3→0）。關聯階段修不好偵測階段的錯。",
+    "**ID 切換可以被退化解作弊**：CostOfNonAssignment=2 時 ID 切換是 0，但覆蓋率只有 0.138——什麼都沒追到就不會切換。所以一定要配一個覆蓋率類的指標。這和第 20 章「全部猜背景」是同一個陷阱。",
+    "**所有 ID 切換的數字都來自合成場景**，因為只有那裡有逐幀身分真值。加分題面對真實資料（atrium.mp4）並說明：三個常見代理指標（軌跡數、壽命中位數、短命軌跡比例）全都抓不到 ID 切換——兩條軌跡互換身分後，這三個數字完全不變。要真的量，200 幀需要約 266 個逐幀身分標註（1–2 小時）；一支 10 分鐘每幀 10 人的產線影片是 18 萬個標註。",
+    "configureKalmanFilter 的 ConstantAcceleration 需要 3 元素的 InitialEstimateError 與 MotionNoise（ConstantVelocity 是 2 元素）；重逢誤差必須在 correct 之前量，correct 之後的估計一定貼近量測；vision.ForegroundDetector 是有狀態物件，每幀重建會讓背景模型永遠停在第一幀且不報錯。"
+  ]
+}
