@@ -56,11 +56,18 @@ coderOK = exist("codegen", "file") > 0 && license("test", "MATLAB_Coder");
 if coderOK
     here = pwd;
     cd(tempdir);
+    % -reportinfo 把診斷訊息存進變數：R2026b 起，codegen 失敗時不再把原因印在命令視窗。
+    % 那個變數建在 base 工作區，所以用 ch30_codegenMessages 去讀（先呼叫一次清掉舊的）。
+    ch30_codegenMessages("cgInfo");
     try
-        codegen("ch29_countGrains", "-args", {zeros(256, 256, "uint8")});
+        codegen("ch29_countGrains", "-args", {zeros(256, 256, "uint8")}, "-reportinfo", "cgInfo");
         disp("（意外：codegen 成功了）")
     catch ME
-        fprintf("codegen 失敗（%s）；原因見上方 codegen 印出的訊息\n", ME.identifier);
+        fprintf("codegen 失敗（%s）\n", ME.identifier);
+        cgMsgs = ch30_codegenMessages("cgInfo");
+        for k = 1:height(cgMsgs)
+            fprintf("  [%s] %s\n", cgMsgs.Type(k), cgMsgs.Text(k));
+        end
     end
     cd(here);
 end
@@ -70,6 +77,13 @@ end
 %[text] name-value arguments for entry-point functions.
 %[text] Error in ==> ch29_countGrains Line: 1 Column: 19
 %[text] ```
+%[text] > **R2026b 起，這段訊息不會自己印出來。** R2026a 的 `codegen` 失敗時會把原因印在命令視窗；
+%[text] > R2026b 只丟出 `emlc:compilationError`，訊息是「To view the report, open(...)」。
+%[text] > 要在程式裡拿到原因，加上 `-reportinfo` 把報告存進變數，讀它的 `Messages`（`Type`、`Text`、`Identifier`）——
+%[text] > 上面的程式就是這樣做的，兩個版本都適用。
+%[text] > **還有一個坑：`-reportinfo` 的變數一律建在 base 工作區**，不是呼叫端。
+%[text] > 在 Live Editor 直接執行看不出差別；包進函式裡就讀不到（`exist` 回傳 false）。
+%[text] > `ch30_codegenMessages` 負責從 base 取出並清掉它。
 %[text] 這不是演算法的問題，是**介面**的問題——C 語言沒有名稱-值引數。
 %[text] `ch30_countGrainsCG` 是改寫後的版本。**演算法一行沒改**，改的全是介面：
 %[text:table]
@@ -202,7 +216,7 @@ if coderOK
     disp("介面：" + libInfo.Signature)
     libOK = libInfo.Success;
 end
-%[text] 本機：建置 64–74 秒，22 個 `.c`、24 個 `.h`、約 7734 行。介面是：
+%[text] 本機：建置 49–74 秒，22 個 `.c`、24 個 `.h`、約 7929 行（R2026a 是 7734 行）。介面是：
 %[text] ```c
 %[text] extern void ch30_countGrainsCG(const unsigned char image[65536],
 %[text]                                double backgroundRadius, double minArea,
@@ -536,8 +550,11 @@ end
 %[text] ```
 %[text] **相依性分析把程式碼裡的檔名字串當成要打包的檔案。** 改成沒有引數時印用法、
 %[text] 以結束碼 2 離開之後，警告消失。部署版的程式**不應該假設任何檔案在固定位置**。
-%[text] ## 第三個陷阱：每次執行要 18–24 秒
+%[text] ## 第三個陷阱：每次執行要 5–8 秒
 %[text] 運算本身約 20 ms，其餘**全是 MATLAB Runtime 的啟動**。
+%[text] R2026b 實測：建置後第一次 7.4–7.8 秒，之後連續執行約 5.2 秒。
+%[text] **R2026a 是 18–24 秒**——R2026b 的 Runtime 啟動快了 3–4 倍（可能和 R2026b 不再內附 Java 有關，本章沒有驗證原因）。
+%[text] 快了很多，但結論不變：**每張影像啟動一次還是不可行**。
 %[text] > **「每張影像啟動一次 exe」在產線上不可行。** 替代做法：
 %[text] > - exe **一次處理一整批**（第 29 章的 `ch29_runBatch`）
 %[text] > - 讓程式**常駐**，透過檔案、TCP 或佇列接工作（§10）
@@ -650,7 +667,7 @@ end
 %[text] 同一個演算法、同一張 256×256 影像，**不同的呼叫方式**：
 latency = table( ...
     ["MATLAB 裡直接呼叫"; "MEX"; "純 C 程式（含行程啟動）"; "一次 Python 呼叫的開銷"; "獨立 exe（含 Runtime 啟動）"], ...
-    [19.03; 10.41; 90; 25; 18200], ...
+    [19.03; 10.41; 90; 25; 7800], ...
     VariableNames=["Method" "Milliseconds"]);
 if ~isnan(tMatlab), latency.Milliseconds(1) = tMatlab * 1e3; end
 if ~isnan(tMex),    latency.Milliseconds(2) = tMex * 1e3; end
@@ -660,7 +677,7 @@ if compilerOK && exeInfo.Success, latency.Milliseconds(5) = exeInfo.RunSeconds *
 latency.RelativeToMEX = latency.Milliseconds / latency.Milliseconds(2);
 disp(latency)
 %[text] （這次執行沒有量到的項目用本機既有量測值；純 C 程式取 §4 三次執行中最快的一次。）
-%[text] > **演算法本身的差距不到 2 倍，呼叫方式的差距超過 1000 倍。**
+%[text] > **演算法本身的差距不到 2 倍，呼叫方式的差距達數百倍**（R2026b 約 850 倍；R2026a 的 Runtime 啟動慢，超過 2000 倍）。
 %[text] > 選部署方式時，先算**每張影像的呼叫開銷**，再談演算法要不要最佳化。
 %[text] ## 典型的產線架構
 %[text] ```
@@ -682,7 +699,7 @@ disp(latency)
 %[text:table]
 %[text] | 原則 | 為什麼 | 對應 |
 %[text] | --- | --- | --- |
-%[text] | **處理程式常駐**，不要每張影像啟動一次 | Runtime 啟動 18–24 秒 | §8 |
+%[text] | **處理程式常駐**，不要每張影像啟動一次 | Runtime 啟動 5–8 秒（R2026a 18–24 秒） | §8 |
 %[text] | **失敗要送「NG／未知」，不是沒送** | PLC 等不到結果時的預設動作通常是「放行」 | 第 29 章 §5 的錯誤隔離 |
 %[text] | 每筆結果帶**演算法版本與參數** | 三個月後才能追溯是哪一版判的 | 第 29 章的 `Params` 欄位 |
 %[text] | 定時送**心跳** | 程式當掉和「一直沒有瑕疵」看起來一樣 | — |
@@ -714,7 +731,7 @@ disp(latency)
 %[text] | 在迴圈裡逐次呼叫 Python | 每次 14–16 ms，比運算本身貴幾百倍 | §7、練習 5 |
 %[text] | Python 大整數轉 double | `2**70` 失去精度 | §7、練習 5 |
 %[text] | Compiler 預設自動偵測支援包 | exe **619.8 MB**（應該 1.5 MB） | §8、加分題 |
-%[text] | 每張影像啟動一次 exe | 每次 18 秒的 Runtime 啟動 | §8、§10 |
+%[text] | 每張影像啟動一次 exe | 每次 5–8 秒的 Runtime 啟動 | §8、§10 |
 %[text] | 只在 MATLAB 裡驗證匯出的模型 | 證明的是「讀得回自己寫的檔」，不是目標框架的結果 | §6 |
 %[text:table]
 %%

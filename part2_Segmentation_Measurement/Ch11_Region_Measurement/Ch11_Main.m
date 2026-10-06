@@ -12,7 +12,7 @@
 %[text] 第 06 章（形態學清理）、第 08 章（分割）、第 10 章（次像素邊緣）。
 %[text] ## 環境需求
 %[text] 第 7 節的 caliper 量測需要
-%[text] **Automated Visual Inspection Library for Computer Vision Toolbox**（選用）。
+%[text] **Visual Inspection Toolbox**（選用；R2026a 以前是 Automated Visual Inspection Library 支援包）。
 assert(exist("checkEnvironment","file") == 2, ...
     "請先切換到課程根目錄並執行 ipcvSetup，再回來執行本章。");
 checkEnvironment(Chapters="11", Verbose=false);
@@ -366,12 +366,13 @@ fprintf("%-28s %10d %11.1f%%" + "\n", "單純數 nnz(bwperim)", naivePixelCount,
 %%
 %[text] # 7. 次像素量測：caliper
 %[text] 第 10 章加分題手刻了次像素邊緣定位。
-%[text] AVI Library（R2025a）提供了專業版的 `caliper`，
+%[text] Visual Inspection Toolbox（R2025a 起；R2026a 以前是 AVI Library 支援包）提供了專業版的 `caliper`，
 %[text] 它沿著一條掃描線找**邊緣對**，並用次像素精度回報距離。
 if hasCaliper
     scanLine = [158 89; 218 131];      % [x1 y1; x2 y2]，斜向穿過一枚硬幣
 
-    measurement = caliper(I, scanLine, GradientThreshold=0.04);
+    % Width 明確寫出來：R2026b 改了它的預設值（見 7.1）
+    measurement = caliper(I, scanLine, GradientThreshold=0.04, Width=50);
 
     fprintf("caliper 量測結果：\n");
     fprintf("  邊緣對內距離（物件寬度）%.4f 像素 = %.4f mm\n", ...
@@ -392,7 +393,7 @@ if hasCaliper
     xlabel("沿掃描線的位置"); ylabel("平均梯度")
     title("梯度剖面（峰值就是邊緣）")
 else
-    disp("未安裝 AVI Library，略過 caliper 示範。")
+    disp("未安裝 Visual Inspection Toolbox，略過 caliper 示範。")
     disp("實測：IntraEdgeDistance = 56.4544 像素")
 end
 %%
@@ -403,15 +404,26 @@ if hasCaliper
         m = caliper(I, [158 89; 218 131], GradientThreshold=0.04, Width=w);
         fprintf("%-12d %s\n", w, mat2str(round(m.IntraEdgeDistance, 3)));
     end
+    mDefault = caliper(I, [158 89; 218 131], GradientThreshold=0.04);   % 不指定 Width
+    fprintf("%-12s %s　（%s）\n", "不指定", mat2str(round(mDefault.IntraEdgeDistance, 3)), ...
+        string(version("-release")));
 end
 %[text] **`Width`** **是掃描帶的寬度**——caliper 會在垂直於掃描線的方向上
 %[text] 取多條平行線，平均成一條剖面再找邊緣。
 %[text] - 太窄（5）→ 剖面嘈雜，邊緣位置不穩，量到 48.1
 %[text] - 太寬 → 若帶寬超過物件的曲率尺度，會把不同位置的邊緣混在一起
-%[text] - 預設 50 在這個案例上剛好 \
+%[text] - 50 在這個案例上剛好 \
 %[text] **`GradientThreshold`** **預設 0.1 對這張圖太高**，完全找不到邊緣。
 %[text] 本例的最大正規化梯度只有約 0.38，實際邊緣處更低，所以要調到 0.04。
 %[text] **判斷方式**：先畫出 `ProfileData`，看梯度的實際量級，再設門檻。
+%[text] > **R2026b 改了** **`Width`** **的預設值，而且不會有任何警告。**
+%[text] > R2026a 的預設是 **50 像素**；R2026b 改成**掃描線長度的 10%**。
+%[text] > 本例的掃描線長 73.2 像素，所以 R2026b 的預設只有 7.3。
+%[text] > 同一行 `caliper(I, scanLine, GradientThreshold=0.04)`，
+%[text] > R2026a 量到 **56.454**，R2026b 量到 **48.094**——**差了 15%**。
+%[text] > 更麻煩的是，**兩個版本的說明文字都寫「Default: 10 pixels」**，和兩個版本的實際行為都對不上。
+%[text] > 教訓：**會影響量測結果的參數，一律明確寫出來**，不要依賴預設值，也不要只相信說明文字。
+%[text] > 所以本章其他的 `caliper` 呼叫都明確指定 `Width=50`，在兩個版本上量到的值相同。
 %%
 %[text] ## 7.2 三種量測的最終比較
 %[text] **一個寫中文教材會踩到的限制**：MATLAB 的**識別字必須是 ASCII**。
@@ -422,7 +434,7 @@ end
 %[text] 所以 table 的變數名用 ASCII，要顯示中文表頭時另外設 `VariableNames`
 %[text] 或在 `disp` 前改名。
 if hasCaliper
-    m = caliper(I, [158 89; 218 131], GradientThreshold=0.04);
+    m = caliper(I, [158 89; 218 131], GradientThreshold=0.04, Width=50);
 
     methodNames = ["regionprops EquivDiameter"
                    "regionprops MajorAxisLength"
@@ -517,6 +529,7 @@ end
 %[text] | 報告只給平均值 | 隱藏了離散程度 | 一定要附標準差或全距 |
 %[text] | 沒說明用哪個屬性量 | 別人無法重現你的數字 | 報告中明確寫出量測定義 |
 %[text] | `caliper` 用預設 `GradientThreshold` | 完全找不到邊緣 | 先看 `ProfileData` 的梯度量級再設門檻 |
+%[text] | `caliper` 依賴 `Width` 的預設值 | 升級到 R2026b 後同一行程式量到的寬度少 15%，**不會報錯** | 會影響結果的參數一律明確指定（本章用 `Width=50`） |
 %[text] | 以為 `caliper` 與 `regionprops` 該一致 | 以為某一個算錯了 | 它們回答**不同的問題**（弦長 vs 等效直徑） |
 %[text:table]
 %%
@@ -528,6 +541,7 @@ end
 %[text] 本章實測比例誤差 0.4%、預測誤差 0.4%
 %[text] - **面積換算是** **`mmPerPixel^2`**
 %[text] - `caliper` 與 `regionprops` 的差異不是誤差，是**問題不同**
+%[text] - **會影響結果的參數要明確寫出**：`caliper` 的 `Width` 預設值在 R2026b 從 50 改成掃描線長的 10%，量到的值差 15%
 %[text] - 報告要含**有效樣本數、排除理由、量測定義、校正誤差、離散程度** \
 %[text] ## 函式速查
 %[text:table]
@@ -539,7 +553,7 @@ end
 %[text] | `bwareafilt` `bwareaopen` | 依面積篩選 |  |
 %[text] | `bwboundaries` | 邊界追蹤 | 回傳 **\[row col\]** |
 %[text] | `imclearborder` | 移除碰邊物件 | **量測前必做** |
-%[text] | `caliper` `uicaliper` | 次像素邊緣對量測 | AVI Library，R2025a |
+%[text] | `caliper` `uicaliper` | 次像素邊緣對量測 | Visual Inspection Toolbox（R2026a 以前是 AVI Library）；**R2026b 改了 `Width` 預設值** |
 %[text] | `imdistline` | 互動式距離量測 | 快速檢查用 |
 %[text] | `imageRegionAnalyzer` | 互動式區域分析 APP | 探索該用哪個屬性 |
 %[text:table]

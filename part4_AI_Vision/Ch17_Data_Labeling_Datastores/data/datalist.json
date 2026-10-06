@@ -13,7 +13,7 @@
     "**自動標註的評估用「已知答案」的資料集**：vehicleTrainingData.mat 有人工標註的框，所以 Grounding DINO 的輸出可以直接用 evaluateObjectDetection 量出 precision／recall／AP，不需要另外標註。這是本章能把「提示詞是超參數」定量呈現的前提。",
     "**必須說明的取樣決定**：第 10 節的提示詞掃描用 `round(linspace(1, 295, 20))` 均勻取樣，**不是取開頭的連續 20 張**。因為第 6 節已經量到這個資料集有 33% 的影像存在近重複，連續取樣會讓同一個場景重複計入，把 precision／recall 都算歪。",
     "**triangleImages 有兩套互相矛盾的 labelIDs 慣例。** trainingLabels/ 的 PNG 是 255=triangle；而同一個資料夾下的 triangleGroundTruth.mat 的 LabelDefinitions 寫 triangle→0。兩者並不矛盾（groundTruth 指的是它自己的 PixelLabelData 檔案，來自影片來源、用另一套編碼），但這正好說明**labelIDs 不能從別處複製，一定要對著手上那批檔案驗證**。第 2 節給出了驗證方法，練習 1 把它寫成函式。",
-    "**加分題的負面結果值得留意**：SAM 在放大 8 倍的合成三角形上，即使給完美的人工框，Jaccard 也只有 0.517。誤差分解顯示框只貢獻 15%、SAM 本身的上限貢獻 85%。基礎模型在訓練分布之外會安靜地退化——與第 12 章「預設 NIQE 在工業影像上把好壞排反」是同一類問題。",
+    "**加分題的負面結果值得留意**：SAM 在放大 8 倍的合成三角形上，即使給完美的人工框，Jaccard 也只有 0.430（R2026b；R2026a 是 0.517）。誤差分解顯示框幾乎不貢獻（R2026b 0%、R2026a 15%），SAM 本身的上限貢獻其餘全部。基礎模型在訓練分布之外會安靜地退化——與第 12 章「預設 NIQE 在工業影像上把好壞排反」是同一類問題。",
     "第 10 節與練習 4 的絕對秒數依機器而異（T550 上約 1.8 秒／張）。教材的結論都寫成 precision／recall／AP 的比較，那些不隨機器改變。",
     "**ViT 未納入本章或第 18 章的可執行段落。** Computer Vision Toolbox Model for Vision Transformer Network 已安裝，但函式名稱是 visionTransformer；而 `which(\"vit\")` 會解析到 Communications Toolbox 的 comm/commmex/vit.mexw64（Viterbi 解碼器），存在名稱衝突。若要在教材裡用 ViT，必須明確呼叫 visionTransformer 並在註解裡說明這個衝突。"
   ]

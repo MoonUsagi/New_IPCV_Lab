@@ -16,7 +16,10 @@ function results = verifyChapters(options)
 %   名稱-值引數：
 %     Chapters  章號字串陣列，預設 "all"
 %     Include   "all"（預設）／"main"／"solution"
-%     Quiet     是否隱藏圖形視窗，預設 true
+%     Quiet       是否隱藏圖形視窗，預設 true
+%     Fast        是否跳過純計時展示的段落，預設 true
+%     CaptureDir  若指定，把每個檔案的命令視窗輸出存成
+%                 CaptureDir/ChNN_main.txt 等，用來比對不同 MATLAB 版本的數字
 %
 %   建議在每次提交教材前執行一次，或接進 CI。
 %
@@ -32,6 +35,7 @@ arguments
     options.Include  (1,1) string {mustBeMember(options.Include,["all" "main" "solution"])} = "all"
     options.Quiet    (1,1) logical = true
     options.Fast     (1,1) logical = true
+    options.CaptureDir (1,1) string = ""
 end
 
 root    = ipcvRoot();
@@ -88,7 +92,7 @@ for k = 1:height(targets)
     msg = "";
     try
         cd(fdir);
-        runIsolated(fn);   % 必須隔離：腳本會在呼叫端的工作區建立變數，
+        out = runIsolated(fn);   % 必須隔離：腳本會在呼叫端的工作區建立變數，
                            % 直接 run 會覆蓋本函式的迴圈計數器與累積變數
     catch ME
         st  = "失敗";
@@ -99,6 +103,13 @@ for k = 1:height(targets)
     end
     el = toc(t0);
     close all force
+
+    if strlength(options.CaptureDir) > 0
+        if ~isfolder(options.CaptureDir), mkdir(options.CaptureDir); end
+        if st ~= "成功", out = msg; end
+        writelines(string(out), fullfile(options.CaptureDir, ...
+            "Ch" + targets.Chapter(k) + "_" + targets.Kind(k) + ".txt"), Encoding="UTF-8");
+    end
 
     if st == "成功"
         fprintf("OK   %5.1f 秒\n", el);
@@ -130,11 +141,11 @@ end
 end
 
 % ========================================================================
-function runIsolated(scriptName)
+function out = runIsolated(scriptName)
 %RUNISOLATED 在獨立的函式工作區執行腳本，避免變數汙染呼叫端。
 %   腳本在 MATLAB 中沒有自己的工作區——它會在呼叫者的工作區建立變數。
 %   把 run 包在這支只有一個輸入變數的小函式裡，腳本的變數就只會影響這裡。
-evalc(sprintf("run('%s')", scriptName));
+out = evalc(sprintf("run('%s')", scriptName));
 end
 
 % ------------------------------------------------------------------------

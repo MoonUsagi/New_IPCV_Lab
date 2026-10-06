@@ -78,13 +78,13 @@ raw = [
     % ---- Part IV AI 視覺 ------------------------------------------------
     "17", "Toolbox", "Deep Learning Toolbox"                                          , "required"
     "17", "AddOn"  , "Computer Vision Toolbox Model for Grounding DINO Object Detection", "required"
-    "17", "AddOn"  , "Image Processing Toolbox Model for Segment Anything Model"      , "required"
     "17", "AddOn"  , "Image Processing Toolbox Model for Segment Anything Model 2"    , "required"
     "18", "Toolbox", "Deep Learning Toolbox"                                          , "required"
     "18", "Toolbox", "Statistics and Machine Learning Toolbox"                        , "required"
     "18", "AddOn"  , "Deep Learning Toolbox Model for ResNet-18 Network"              , "required"
     "18", "AddOn"  , "Deep Learning Toolbox Model for ResNet-50 Network"              , "optional"
     "18", "AddOn"  , "Deep Learning Toolbox Model for MobileNet-v2 Network"           , "optional"
+    "18", "AddOn"  , "Deep Learning Toolbox Model for DarkNet-19 Network"             , "optional"
     "18", "AddOn"  , "Computer Vision Toolbox Model for Vision Transformer Network"   , "optional"
     "18", "Toolbox", "Parallel Computing Toolbox"                                     , "optional"
     "19", "Toolbox", "Deep Learning Toolbox"                                          , "required"
@@ -96,7 +96,7 @@ raw = [
     "20", "Toolbox", "Deep Learning Toolbox"                                          , "required"
     "20", "AddOn"  , "Deep Learning Toolbox Model for ResNet-18 Network"              , "required"
     "20", "AddOn"  , "Computer Vision Toolbox Model for SOLOv2 Instance Segmentation" , "required"
-    "20", "AddOn"  , "Image Processing Toolbox Model for Segment Anything Model"      , "optional"
+    "20", "AddOn"  , "Image Processing Toolbox Model for Segment Anything Model 2"    , "optional"
     "20", "Toolbox", "Parallel Computing Toolbox"                                     , "optional"
     "21", "Toolbox", "Deep Learning Toolbox"                                          , "required"
     "21", "AddOn"  , "Computer Vision Toolbox Model for OpenAI CLIP Network"          , "required"
@@ -106,6 +106,7 @@ raw = [
     "22", "Toolbox", "Deep Learning Toolbox"                                          , "required"
     "22", "Toolbox", "Visual Inspection Toolbox"                                      , "required"
     "22", "AddOn"  , "Deep Learning Toolbox Model for ResNet-18 Network"              , "required"
+    "22", "AddOn"  , "Visual Inspection Toolbox Model for CounTR Object Counting"     , "optional"
 
     % ---- Part V 動態、3D 與空間視覺 -------------------------------------
     "23", "Toolbox", "Image Acquisition Toolbox"                                      , "required"

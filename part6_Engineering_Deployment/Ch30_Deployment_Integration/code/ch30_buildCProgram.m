@@ -72,9 +72,16 @@ if ~options.Force && sameMain && isfile(exeFile) && isfile(zipFile) && ...
     info.Cached = true;
 else
     t0 = tic;
-    b = load(buildInfoFile);
+    % R2026b 直接 load buildInfo.mat 會警告「build folder is not explicitly specified」，
+    % 要改用 loadBuildInfo；R2026a 沒有 loadBuildInfo，只能 load
+    if exist("loadBuildInfo", "file")
+        buildInfo = loadBuildInfo(libDir);
+    else
+        b = load(buildInfoFile);
+        buildInfo = b.buildInfo;
+    end
     if isfile(zipFile), delete(zipFile); end
-    packNGo(b.buildInfo, fileName=zipFile, packType="flat");
+    packNGo(buildInfo, fileName=zipFile, packType="flat");
     if isfolder(packDir), rmdir(packDir, "s"); end
     unzip(zipFile, packDir);
     % setup_msvc.bat 是本機編譯器的設定，不屬於交付包；只拿來編譯

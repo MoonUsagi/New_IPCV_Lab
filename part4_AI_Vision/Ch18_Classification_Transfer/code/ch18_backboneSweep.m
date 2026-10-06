@@ -96,13 +96,17 @@ warning(ws);
 tbl = table(nameCol, layerCol, nFeat, acc, sec, ...
     VariableNames=["骨幹" "池化層" "維度" "準確率" "秒數"]);
 
-if any(ok)
+if nnz(ok) >= 2
     [bestAcc, iBest] = max(acc);
     [~, iSmall] = min(nFeat);
     fprintf("\n準確率最高：%s（%.4f）\n", nameCol(iBest), bestAcc);
     if iBest == iSmall
         fprintf("**而它也是特徵維度最小的骨幹——大的不一定好。**\n");
     end
+elseif nnz(ok) == 1
+    % 只有一個骨幹跑得動（其餘缺支援包）時，「誰最好」沒有意義
+    fprintf("\n只有 %s 成功（%.4f），其餘骨幹缺支援包，無法比較。\n", ...
+        nameCol(ok), acc(ok));
 end
 end
 

@@ -1,7 +1,8 @@
 %[text] # 第 30 章　練習解答
 %[text] {"align":"left"}部署與系統整合　｜　MATLAB R2026b
-%[text] > 這份解答的數字都是**本機**（Windows 11、MATLAB R2026a、MSVC 2019、NVIDIA T550）
-%[text] > 實際跑出來的。你的機器上時間會不同，但**結論的方向**應該一樣。
+%[text] > 這份解答的數字都是**本機**（Windows 11、MSVC 2019、NVIDIA T550）實際跑出來的：
+%[text] > 表格大多是 R2026a 的量測，R2026b 重測後結論相同（計時差 10–20%）。
+%[text] > 你的機器上時間會不同，但**結論的方向**應該一樣。
 %[text] > 需要 MATLAB Coder 的題目會重用 `tempdir/ch30_build` 的快取；第一次執行較久。
 assert(exist("ch30_countGrainsCG", "file") == 2, ...
     "請先切換到課程根目錄並執行 ipcvSetup。");
@@ -59,14 +60,22 @@ if coderOK
     for k = 1:size(cases, 1)
         t0 = tic;
         try
-            codegen("-config", cfg, cases{k, 1}, "-args", cases{k, 2}, "-d", "out_" + cases{k, 1});
+            ch30_codegenMessages("cgInfo");     % 清掉上一個函式的報告
+            codegen("-config", cfg, cases{k, 1}, "-args", cases{k, 2}, "-d", "out_" + cases{k, 1}, ...
+                "-reportinfo", "cgInfo");
             result(k) = "通過";
         catch ME
-            % codegen 的 ME.message 常以空行開頭，真正的原因在後面幾行
-            msgLines = strtrim(splitlines(string(ME.message)));
-            msgLines = msgLines(strlength(msgLines) > 0 & ~startsWith(msgLines, "Error in") ...
-                & ~startsWith(msgLines, "Code generation failed"));
-            if isempty(msgLines), msgLines = "（見上方 codegen 的輸出）"; end
+            % ME.message 只說「去看報告」，真正的原因在 -reportinfo 的 Messages 裡
+            % （R2026b 起 codegen 也不再把原因印在命令視窗；變數建在 base 工作區）
+            cgMsgs = ch30_codegenMessages("cgInfo");
+            msgLines = cgMsgs.Text(cgMsgs.Type == "Error");
+            if isempty(msgLines), msgLines = cgMsgs.Text; end
+            if isempty(msgLines)
+                msgLines = strtrim(splitlines(string(ME.message)));
+                msgLines = msgLines(strlength(msgLines) > 0 & ~startsWith(msgLines, "Error in") ...
+                    & ~startsWith(msgLines, "Code generation failed"));
+            end
+            if isempty(msgLines), msgLines = "（原因不明，請看 codegen 報告）"; end
             result(k) = "失敗：" + msgLines(1);
         end
         seconds(k) = toc(t0);

@@ -15,11 +15,13 @@ rng(0);
 %[text] 2. 用四類（circle / square / triangle / background）訓練
 %[text] 3. 拿去做滑動視窗偵測，量 precision 與 recall
 %[text] 4. 與主教材的兩種做法比較：
-%[text]    | 做法 | precision | recall |
-%[text]    |---|---|---|
-%[text]    | 原始（三類） | 0.8% | 100.0% |
-%[text]    | 硬負樣本挖掘 | 100.0% | 100.0% |
-%[text]    | **你的四類版本** | ? | ? |
+%[text:table]
+%[text] | 做法 | precision | recall |
+%[text] | --- | --- | --- |
+%[text] | 原始（三類） | 0.8% | 100.0% |
+%[text] | 硬負樣本挖掘 | 100.0% | 100.0% |
+%[text] | **你的四類版本** | ? | ? |
+%[text:table]
 %[text] 5. 回答：哪一種做法比較好？為什麼？ \
 %[text] **第 5 點要想清楚。** 兩種做法都是在「補上缺失的訓練分布」，
 %[text] 但一個是**事先猜**背景長什麼樣，一個是**事後找**模型真正會錯的地方。

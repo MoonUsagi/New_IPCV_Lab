@@ -14,7 +14,8 @@
 %[text] ## 環境需求
 %[text] Computer Vision Toolbox、Deep Learning Toolbox，
 %[text] 以及 **Computer Vision Toolbox Model for Grounding DINO Object Detection**
-%[text] 與 **Image Processing Toolbox Model for Segment Anything Model** 兩個支援包。
+%[text] 與 **Image Processing Toolbox Model for Segment Anything Model 2** 兩個支援包
+%[text] （`segmentAnythingModel` 不給名稱時載入的是 `"sam2-large"`，不需要初代 SAM 的支援包）。
 %[text] 沒裝支援包時 §9–§12 會跳過並印出訊息。
 assert(exist("ch17_dupGroups","file") == 2, ...
     "請先切換到課程根目錄並執行 ipcvSetup。");
@@ -22,7 +23,9 @@ rng(0);
 
 addons = matlab.addons.installedAddons;
 hasGDINO = any(contains(addons.Name, "Grounding DINO"));
-hasSAM   = any(contains(addons.Name, "Segment Anything"));
+% segmentAnythingModel／imsegsam 的預設是 "sam2-large"，要的是 SAM 2 支援包
+% （只比對 "Segment Anything" 會把只裝了初代 SAM 的環境誤判成可以跑）
+hasSAM   = any(addons.Name == "Image Processing Toolbox Model for Segment Anything Model 2");
 fprintf("Grounding DINO 支援包：%s\n", string(hasGDINO));
 fprintf("SAM 支援包：          %s\n", string(hasSAM));
 %%

@@ -6,8 +6,8 @@ function [detector, info] = ch22_trainAnomaly(data, method, options)
 %
 %     "patchcore"   - **預設，唯一在本機驗證過的**
 %     "fastflow"    - 需要 trainingOptions（第三個位置引數）
-%     "fcdd"        - **需要瑕疵樣本**，不是純單類別方法
-%     "efficientad" - 見說明
+%     "fcdd"        - R2026b 起可以只給良品；R2026a 以前需要瑕疵樣本
+%     "efficientad" - **R2026b 已移除**，會丟出錯誤並指向替代方案
 %
 %   名稱-值引數：
 %     Backbone      - PatchCore 的骨幹（預設 "resnet18"）
@@ -34,9 +34,10 @@ function [detector, info] = ch22_trainAnomaly(data, method, options)
 %   **② `fastFlowAnomalyDetector` 的 `Backbone` 要 `dlnetwork`，
 %   不吃字串名稱。**
 %
-%   **③ FCDD 需要瑕疵樣本**（`trainFCDDAnomalyDetector(normalData,
-%   anomalyData, detector, options)`）。**它不是單類別方法**，
-%   和本章「只有良品」的前提不同——這個差別常被忽略。
+%   **③ FCDD 在 R2026a 需要瑕疵樣本**（`trainFCDDAnomalyDetector(normalData,
+%   anomalyData, detector, options)`），那時**它不是單類別方法**。
+%   **R2026b 起 anomalyData 可以省略**，這裡就走只給良品的路線。
+%   實測（R2026b、預設 5 epoch、T550 GPU）：25.5 秒，良品 0.004 ± 0.001、瑕疵 0.881 ± 0.153。
 %   ============================================================
 %
 %   **PatchCore 為什麼適合當起點**
@@ -104,21 +105,39 @@ switch method
         info.Trained = true;
 
     case "fcdd"
-        % **FCDD 需要瑕疵樣本**——它不是純單類別方法
-        if size(data.Bad, 4) == 0
+        % R2026a 以前：trainFCDDAnomalyDetector 一定要給瑕疵樣本，不是單類別方法。
+        % R2026b 起：anomalyData 可以省略，只給良品就能訓練。
+        if isMATLABReleaseOlderThan("R2026b")
             error("ch22_trainAnomaly:fcddNeedsAnomalies", ...
-                "FCDD 需要瑕疵樣本（trainFCDDAnomalyDetector 的第二個引數）。" + ...
-                "**它不是單類別方法**，和本章「只有良品」的前提不同。");
+                "R2026a 以前的 FCDD 需要瑕疵樣本（trainFCDDAnomalyDetector 的第二個引數），" + ...
+                "**它不是單類別方法**，和本章「只有良品」的前提不同。R2026b 起可以只給良品。");
         end
-        error("ch22_trainAnomaly:notVerified", ...
-            "FCDD 的建構需要一個 dlnetwork（fcddAnomalyDetector(network)），" + ...
-            "而且訓練要 (normalData, anomalyData, detector, options)。" + ...
-            "**本機尚未驗證這條路線**——請見 README 的待驗證清單。");
+        % FCDD 的建構要一個 dlnetwork 骨幹，不吃字串名稱
+        detector = fcddAnomalyDetector(pretrainedEncoderNetwork(options.Backbone, 3));
+        opts = trainingOptions("adam", ...
+            MaxEpochs=options.MaxEpochs, ...
+            MiniBatchSize=options.MiniBatchSize, ...
+            Verbose=false, Plots="none");
+        info.TrainingOptions = opts;
+        if ~options.DoTrain
+            info.Note = "未訓練（DoTrain=false）";
+            return
+        end
+        t = tic;
+        detector = trainFCDDAnomalyDetector(dsGood, detector, opts);   % 不給瑕疵樣本
+        info.SecTrain = toc(t);
+        info.Trained = true;
 
     case "efficientad"
-        error("ch22_trainAnomaly:notVerified", ...
-            "EfficientAD 在本機尚未驗證。" + ...
-            "**請見 README 的待驗證清單。**");
+        if isMATLABReleaseOlderThan("R2026b")
+            error("ch22_trainAnomaly:notVerified", ...
+                "EfficientAD 在本機尚未驗證。" + ...
+                "**請見 README 的待驗證清單。**");
+        end
+        error("ch22_trainAnomaly:removed", ...
+            "R2026b 已移除 efficientADAnomalyDetector。官方建議改用 " + ...
+            "studentTeacherAnomalyDetector（需要 Visual Inspection Toolbox Model for " + ...
+            "Student-Teacher Anomaly Detection 支援包）。");
 end
 
 if info.Trained

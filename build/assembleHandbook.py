@@ -121,6 +121,9 @@ def front_matter(chapters, starts, release, date, page_size, measured="R2026a"):
     notes = [
         "這本手冊由 31 章的主教材（ChNN_Main.m）重新執行後匯出。每一章的文字、程式碼、輸出與圖都來自同一份檔案，改教材就是改手冊。",
         (f"教材裡的數字都在開發機（MATLAB {release}、NVIDIA T550 4 GB）上實測。"
+         + ("少數段落因為缺選用支援包或工具而沒有在 R2026b 重測，保留 R2026a 的數字並在內文加註（清單見 docs/R2026B_MIGRATION.md）；"
+            "版本之間會變的結論（例如 Ch.11 的 caliper 預設值、Ch.25 的棋盤格偵測、Ch.26 的 pcfitplane）都寫成兩個版本的對照。"
+            if release == "R2026b" else "")
          if measured == release else
          f"<b>教材內文引用的數字大多是在 MATLAB {measured} 上實測的</b>；本手冊的程式輸出則是在 MATLAB {release} 上重新執行的結果，"
          f"兩者若有差異，以輸出為準。已知會隨版本改變的結論（例如 Ch.26 的 pcfitplane）已改寫成兩個版本的對照。")
@@ -182,7 +185,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--root", default=str(Path(__file__).resolve().parents[1]))
     ap.add_argument("--release", default="R2026b")
-    ap.add_argument("--measured", default="R2026a", help="教材內文數字是在哪個版本實測的")
+    ap.add_argument("--measured", default="R2026b", help="教材內文數字是在哪個版本實測的")
     ap.add_argument("--date", default=datetime.date.today().isoformat())
     ap.add_argument("--out", default="IPCV_Lab_Handbook.pdf")
     args = ap.parse_args()

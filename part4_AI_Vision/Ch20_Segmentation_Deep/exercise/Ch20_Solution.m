@@ -358,7 +358,8 @@ end
 %[text] 6. 主教材 §5 的指標比較，換成**真實模型的輸出**再做一次
 %%
 %[text] # 解答 6：SAM 2 當類別無關的分割器
-hasSAM = any(contains(addons.Name, "Segment Anything"));
+% imsegsam 的預設模型是 "sam2-large"，要的是 SAM 2 支援包
+hasSAM = any(addons.Name == "Image Processing Toolbox Model for Segment Anything Model 2");
 if ~hasSAM || ipcvFast()
     disp("（沒有 SAM 支援包或處於快速模式，略過。）")
 else

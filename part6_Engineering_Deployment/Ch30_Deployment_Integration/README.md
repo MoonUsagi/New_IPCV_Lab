@@ -52,7 +52,7 @@ name-value arguments for entry-point functions.
 
 | 目標 | `.c` 檔 | 行數 | 依賴 |
 |---|---|---|---|
-| MATLAB 主機（預設） | 22 | 7734 | **20 個 MathWorks DLL**（libmwmorphop、IPP、TBB、boost），只能在 Windows x64 跑 |
+| MATLAB 主機（預設） | 22 | 7929（R2026a 7734） | **20 個 MathWorks DLL**（libmwmorphop、IPP、TBB、boost），只能在 Windows x64 跑 |
 | ARM Cortex-A | 32 | 17566 | **沒有**——可攜的純 C |
 
 直接在 codegen 資料夾編譯會失敗在 `'tmwtypes.h': No such file or directory`。
@@ -89,9 +89,9 @@ name-value arguments for entry-point functions.
 | MATLAB | 19.0 ms |
 | 一次 Python 呼叫的開銷（OutOfProcess） | 14–31 ms（傳 8.4 MB 也只多幾毫秒） |
 | 純 C 程式（含行程啟動） | 約 90 ms |
-| **獨立 exe（含 MATLAB Runtime 啟動）** | **18–24 秒** |
+| **獨立 exe（含 MATLAB Runtime 啟動）** | **5–8 秒**（R2026a 18–24 秒） |
 
-**演算法的差距不到 2 倍，呼叫方式的差距超過 1000 倍。**
+**演算法的差距不到 2 倍，呼叫方式的差距達數百倍**（R2026b 約 850 倍；R2026a 超過 2000 倍）。
 
 ### 8. MATLAB Compiler 預設打包 619.8 MB（§8、加分題）
 
@@ -122,6 +122,14 @@ name-value arguments for entry-point functions.
 - **strel 的半徑**：我原本以為必須是編譯時常數，實測 MEX 在半徑 5/10/15/25 都與 MATLAB 一致——**印象是錯的**。
 - **環境變數 `NoDefaultCurrentDirectoryInExePath`**：讓 codegen 失敗在「'xxx_mex.bat' 不是內部或外部命令」，連 `y = x + 1` 都編不過。`ch30_buildMex` 只在 MATLAB 行程內清掉它。
 
+## R2026b 注意事項
+
+- **codegen 失敗時不再把原因印在命令視窗**，只丟 `emlc:compilationError`（「To view the report, open(...)」）。
+  要在程式裡拿到原因，用 `-reportinfo` 讀 `Messages`；**那個變數建在 base 工作區**，包進函式就讀不到，所以寫成 `ch30_codegenMessages`。
+- **`load("buildInfo.mat")` 會警告**要求改用 `loadBuildInfo`（R2026a 沒有這個函式），`ch30_buildCProgram` 依版本分支。
+- **獨立 exe 的 Runtime 啟動快了 3–4 倍**：R2026a 18–24 秒 → R2026b 第一次 7.4–7.8 秒、之後約 5.2 秒。
+- ONNX 匯入多印三行進度訊息；這個模型**仍然**產生自訂層 `Transpose_To_ReshapeLayer1000`（我原本預期 R2026b 會改成內建層，猜錯了）。
+
 ## 檔案
 
 | 檔案 | 說明 |
@@ -131,6 +139,7 @@ name-value arguments for entry-point functions.
 | `code/ch30_countGrainsGPU.m` | GPU Coder 版（`bwlabel` 取代 `bwconncomp` 的 `PixelIdxList`） |
 | `code/ch30_buildMex.m` | 建 MEX（固定／可變大小）或 C 函式庫，有快取，處理環境變數陷阱 |
 | `code/ch30_buildCProgram.m` | `packNGo` 打交付包，在包裡編一支純 C 呼叫端 |
+| `code/ch30_codegenMessages.m` | 讀 `codegen -reportinfo` 的診斷訊息（R2026b 失敗時不再印原因；變數建在 base 工作區） |
 | `code/ch30_onnxRoundTrip.m` | ONNX 匯出→匯入→比輸出，偵測維度轉置 |
 | `code/ch30_pythonBridge.m` | Python 型別對照與呼叫成本（不改 `pyenv`） |
 | `code/ch30_grainCLI.m` | 命令列介面層（給 Compiler 打包；失敗時非零結束碼） |

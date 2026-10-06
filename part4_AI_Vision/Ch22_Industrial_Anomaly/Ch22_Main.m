@@ -12,7 +12,8 @@
 %[text] 第 18 章（遷移學習、雜訊分析）、第 20 章（類別不平衡與逐類別指標）。
 %[text] ## 環境需求
 %[text] Computer Vision Toolbox、Deep Learning Toolbox，以及
-%[text] **Automated Visual Inspection Library for Computer Vision Toolbox**。
+%[text] **Visual Inspection Toolbox**（R2026a 以前是 Automated Visual Inspection Library 支援包）。
+%[text] §9 的 CounTR 另外需要 **Visual Inspection Toolbox Model for CounTR Object Counting** 支援包（選用）。
 %[text] > ## **關於本章的資料——請先讀這一段**
 %[text] > **本章預設使用合成的良品／瑕疵影像**，理由有兩個：
 %[text] > 1. MATLAB 沒有內建的瑕疵資料集（`pillQC` 等都要下載）
@@ -28,8 +29,15 @@ assert(exist("ch22_loadDataset","file") == 2, ...
 rng(0);
 
 addons = matlab.addons.installedAddons;
-hasAVI = any(contains(addons.Name, "Automated Visual Inspection"));
-fprintf("AVI Library：%s\n", string(hasAVI));
+% R2026b 起是獨立產品 Visual Inspection Toolbox；R2026a 以前是 AVI Library 支援包
+hasVIT = any(contains(addons.Name, ["Visual Inspection Toolbox" "Automated Visual Inspection"]));
+% CounTR 的權重：R2026a 包在 AVI Library 裡，R2026b 要另裝模型支援包
+if isMATLABReleaseOlderThan("R2026b")
+    hasCounTR = hasVIT;
+else
+    hasCounTR = any(addons.Name == "Visual Inspection Toolbox Model for CounTR Object Counting");
+end
+fprintf("Visual Inspection Toolbox：%s　CounTR 模型：%s\n", string(hasVIT), string(hasCounTR));
 %%
 %[text] # 1. 這一章的位置：只有良品樣本
 %[text] 前面四章都假設你有各個類別的標註。**產線上通常沒有。**
@@ -229,27 +237,37 @@ end
 %[text] | --- | --- | --- | --- |
 %[text] | **PatchCore** | `patchCoreAnomalyDetector(Backbone=...)` | `train...(normalData, detector)` | **不用** |
 %[text] | FastFlow | `fastFlowAnomalyDetector(Name=Value)` | `train...(normalData, detector, **options**)` | 不用 |
-%[text] | **FCDD** | `fcddAnomalyDetector(**network**)` | `train...(normalData, **anomalyData**, detector, options)` | **要** |
-%[text] | EfficientAD | `efficientADAnomalyDetector` | — | 不用 |
+%[text] | **FCDD** | `fcddAnomalyDetector(**network**)` | R2026a：`train...(normalData, **anomalyData**, detector, options)`；**R2026b 起** **`anomalyData`** **可省略** | R2026a **要**；R2026b 不用 |
+%[text] | Student-Teacher | `studentTeacherAnomalyDetector` | `trainStudentTeacherAnomalyDetector` | 不用 |
 %[text:table]
 %[text] 三個要注意的地方：
 %[text] **① `fastFlowAnomalyDetector` 的 `Backbone` 要 `dlnetwork`**，
 %[text] 不吃字串名稱（PatchCore 吃字串）。
-%[text] **② FCDD 需要瑕疵樣本。**
-%[text] `trainFCDDAnomalyDetector(normalData, **anomalyData**, detector, options)`
-%[text] ——**它不是單類別方法**，和本章「只有良品」的前提不同。
-%[text] 這個差別常被忽略，因為它被歸在同一組 API 裡。
-%[text] **③ 只有 PatchCore 不需要梯度訓練**，所以只有它在本機驗證過。
-%[text] > **FastFlow／FCDD／EfficientAD 的訓練路線在本機沒有跑過**
+%[text] **② FCDD 在 R2026a 需要瑕疵樣本，R2026b 不用了。**
+%[text] R2026a 的 `trainFCDDAnomalyDetector(normalData, **anomalyData**, detector, options)`
+%[text] 一定要給瑕疵資料——那時**它不是單類別方法**，和本章「只有良品」的前提不同，
+%[text] 而這個差別常被忽略，因為它被歸在同一組 API 裡。
+%[text] **R2026b 起** **`anomalyData`** **可以省略**（版本說明指出它會自動產生合成異常）。
+%[text] 實測 `ch22_trainAnomaly(data, "fcdd")`：只用 24 張良品、預設 5 個 epoch，在本機 GPU（T550）上訓練 25.5 秒，良品分數 0.004 ± 0.001（最大 0.005）、瑕疵 0.881 ± 0.153（最小 0.677），完全分開。
+%[text] **4 GB 的 T550 跑得動**——64×64 的小影像加上凍結的 ResNet-18 骨幹，記憶體需求很小。
+%[text] ——和 PatchCore 一樣，**這個分離度是合成資料給的**，不是 FCDD 的實力證明。
+%[text] **③ EfficientAD 在 R2026b 被移除了。**
+%[text] `efficientADAnomalyDetector` 不在 Visual Inspection Toolbox 裡，官方建議改用
+%[text] `studentTeacherAnomalyDetector`（另需 **Visual Inspection Toolbox Model for
+%[text] Student-Teacher Anomaly Detection** 支援包）。兩者都是學生－教師法，
+%[text] 但依文件，新物件沒有 EfficientAD 偵測缺件、錯位這類「邏輯異常」的自編碼器選項。
+%[text] > **FastFlow 與 Student-Teacher 的訓練路線在本機沒有跑過**
 %[text] > （開發機器是 T550，4.29 GB）。
 %[text] > `ch22_trainAnomaly` 對它們會丟出明確的錯誤訊息，
 %[text] > 而不是安靜地失敗。README 有待驗證清單。
 %%
 %[text] # 9. 物件計數：CounTR
-%[text] AVI Library 還提供 `counTRObjectCounter`——
+%[text] Visual Inspection Toolbox 還提供 `counTRObjectCounter`——
 %[text] 給**一個範例 patch**就能數出畫面裡有幾個同類物件，**不需要訓練**。
 if ipcvFast()
     disp("（快速模式：略過 CounTR。完整執行約 10 秒。）")
+elseif ~hasCounTR
+    disp("（未安裝 Visual Inspection Toolbox Model for CounTR Object Counting，略過 CounTR。）")
 else
     I = imread("peppers.png");
     exemplar = {I(160:230, 200:280, :)};     % 一顆椒當範例

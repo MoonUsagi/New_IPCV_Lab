@@ -3,7 +3,7 @@ function [params, report] = ch25_calibrateSet(setName, options)
 %
 %   [PARAMS, REPORT] = CH25_CALIBRATESET(SETNAME) 對 MATLAB 內建的
 %   標定影像集做單相機標定。SETNAME 可以是：
-%     "mono"   1072x712，10 張（**只有 9 張偵測得到**），一般鏡頭
+%     "mono"   1072x712，10 張（R2026b 全部偵測得到；**R2026a 只有 9 張**），一般鏡頭
 %     "dslr"   1626x1080，9 張
 %     "gopro"  2000x1500，11 張，**廣角／魚眼**
 %     "slr"    2816x1880，9 張
@@ -13,7 +13,7 @@ function [params, report] = ch25_calibrateSet(setName, options)
 %     NumDetected      偵測成功幾張
 %     MeanError        平均重投影誤差（像素）
 %     PerImageError    每張的平均誤差
-%     WorstImage       誤差最大的那一張
+%     WorstImage       誤差最大的那一張（**檔案的編號**，不是偵測成功的第幾張）
 %     FocalLength / PrincipalPoint / RadialDistortion / TangentialDistortion
 %     BowBefore / BowAfter  去畸變前後的**相對彎曲度**（見下）
 %     BowImprovement   彎曲度改善的百分比
@@ -22,7 +22,7 @@ function [params, report] = ch25_calibrateSet(setName, options)
 %   **重投影誤差是這一章最容易被誤信的數字。**
 %   它只在**有標定角點的地方**計算，而角點永遠不會覆蓋到影像的最邊角。
 %   §4 量到：2 階與 3 階徑向畸變的重投影誤差只差 **0.0001 像素**，
-%   但去畸變後的角落位置差 **200 像素**。
+%   但去畸變後的角落位置差 **225 像素**（R2026a 是 200 像素）。
 %
 %   「彎曲度」量的是另一件事：**棋盤格上本來是直線的一排角點，
 %   去畸變之後有多直**。定義為
@@ -72,10 +72,12 @@ fileNames = string(fullfile({files.folder}, {files.name}));
 
 [imagePoints, boardSize, imagesUsed] = detectCheckerboardPoints(fileNames);
 
+fileIdx = find(imagesUsed);              % 偵測成功的影像是第幾個檔案
 if ~isempty(options.UseImages)
     keep = options.UseImages;
     keep = keep(keep <= size(imagePoints,3));
     imagePoints = imagePoints(:,:,keep);
+    fileIdx = fileIdx(keep);
 end
 
 worldPoints = generateCheckerboardPoints(boardSize, options.SquareSize);
@@ -123,7 +125,7 @@ report = struct( ...
     ImageSize      = imageSize, ...
     MeanError      = params.MeanReprojectionError, ...
     PerImageError  = perImage(:)', ...
-    WorstImage     = worst, ...
+    WorstImage     = fileIdx(worst), ...  % 有影像偵測失敗時，偵測序號和檔案編號會對不上
     BowBefore      = mean(bowBefore), ...
     BowAfter       = mean(bowAfter), ...
     BowImprovement = (1 - mean(bowAfter)/mean(bowBefore)) * 100, ...

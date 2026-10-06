@@ -111,9 +111,19 @@ $(1-p)\approx 1$、漏檢項只有 $0.01$——
 |---|---|---|---|
 | **PatchCore** | `patchCoreAnomalyDetector(Backbone=...)` | `train...(normalData, detector)` | **不用** |
 | FastFlow | `fastFlowAnomalyDetector(Name=Value)`，`Backbone` 要 **dlnetwork** | `train...(normalData, detector, **options**)` | 不用 |
-| **FCDD** | `fcddAnomalyDetector(**network**)` | `train...(normalData, **anomalyData**, detector, options)` | **要** |
+| **FCDD** | `fcddAnomalyDetector(**network**)` | R2026a：`train...(normalData, **anomalyData**, detector, options)`；**R2026b 可省略 `anomalyData`** | R2026a **要**；R2026b 不用 |
+| Student-Teacher | `studentTeacherAnomalyDetector` | `trainStudentTeacherAnomalyDetector` | 不用 |
 
-  **FCDD 不是單類別方法**——這個差別常被忽略，因為它被歸在同一組 API 裡。
+  **R2026a 的 FCDD 不是單類別方法**——這個差別常被忽略，因為它被歸在同一組 API 裡。
+  R2026b 起可以只給良品：實測只用 24 張良品、預設 5 個 epoch，在本機 GPU（T550）上訓練 25.5 秒，良品分數 0.004 ± 0.001（最大 0.005）、瑕疵 0.881 ± 0.153（最小 0.677），完全分開（合成資料）。
+
+## R2026b 注意事項
+
+- **EfficientAD 被移除了**：`efficientADAnomalyDetector` 不在 Visual Inspection Toolbox 裡，
+  官方建議改用 `studentTeacherAnomalyDetector`（另需 Student-Teacher 模型支援包）。
+- **FCDD 可以不給瑕疵樣本**（見上表）。
+- **CounTR 要另裝支援包**：Visual Inspection Toolbox Model for CounTR Object Counting。
+  R2026a 包在 AVI Library 裡，所以升級後才會發現少了它。
 
 ## 檔案
 
@@ -163,8 +173,9 @@ data = ch22_loadDataset(Source="folder", ...
 |---|---|
 | **PatchCore** | ✅ 完整驗證（訓練 + 推論 + 異常圖 + 評估） |
 | FastFlow | ❌ 需要梯度訓練，本機（T550 4.29 GB）未跑 |
-| FCDD | ❌ 需要 `dlnetwork` 與瑕疵樣本，未跑 |
-| EfficientAD | ❌ 未跑 |
+| FCDD | ✅ R2026b 只給良品的路線已實測（預設 5 epoch、T550 GPU 25.5 秒）；R2026a 需要瑕疵樣本的路線未跑 |
+| EfficientAD | ⛔ R2026b 已移除 |
+| Student-Teacher（EfficientAD 的替代） | ❌ 需要另裝支援包，未跑 |
 | AnomalyCLIP 零樣本瑕疵檢測 | ❌ `anomalyclipAnomalyDetector` 不存在 |
 
 `ch22_trainAnomaly` 對未驗證的方法會丟出**明確的錯誤訊息**，

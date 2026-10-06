@@ -6,7 +6,9 @@ rng(0);
 
 addons = matlab.addons.installedAddons;
 hasGDINO = any(contains(addons.Name, "Grounding DINO"));
-hasSAM   = any(contains(addons.Name, "Segment Anything"));
+% segmentAnythingModel／imsegsam 的預設是 "sam2-large"，要的是 SAM 2 支援包
+% （只比對 "Segment Anything" 會把只裝了初代 SAM 的環境誤判成可以跑）
+hasSAM   = any(addons.Name == "Image Processing Toolbox Model for Segment Anything Model 2");
 
 triDir = fullfile(toolboxdir("vision"), "visiondata", "triangleImages");
 vroot  = fullfile(toolboxdir("vision"), "visiondata");
@@ -545,8 +547,8 @@ end
 %[text:table]
 %[text] | 遮罩來源 | Jaccard | Dice | BFscore |
 %[text] | --- | --- | --- | --- |
-%[text] | ① VLM 的框 → SAM | 0.4297 | 0.6011 | **0.7785** |
-%[text] | ② 人工的框 → SAM（上限） | **0.5169** | **0.6815** | 0.7193 |
+%[text] | ① VLM 的框 → SAM | 0.4297 | 0.6011 | 0.7785 |
+%[text] | ② 人工的框 → SAM（上限） | 0.4295 | 0.6009 | 0.7785 |
 %[text:table]
 %[text] Grounding DINO 的框是 `[191 6 64 73]`，真實框 `[193 9 64 72]`，
 %[text] **兩者 IoU = 0.904——框抓得很準。**
@@ -554,23 +556,28 @@ end
 %[text:table]
 %[text] | 來源 | Jaccard 損失 | 佔總誤差 |
 %[text] | --- | --- | --- |
-%[text] | 框不準（② − ①） | 0.087 | **15%** |
-%[text] | SAM 本身的上限（1 − ②） | 0.483 | **85%** |
+%[text] | 框不準（② − ①） | −0.0003 | **0%** |
+%[text] | SAM 本身的上限（1 − ②） | 0.5705 | **100%** |
 %[text:table]
-%[text] **85% 的誤差不是框造成的，是 SAM 做不好這個形狀。**
-%[text] 就算給它完美的人工框，Jaccard 也只有 0.517。
+%[text] **誤差幾乎全部不是框造成的，是 SAM 做不好這個形狀。**
+%[text] 就算給它完美的人工框，Jaccard 也只有 0.430——和 VLM 的框一模一樣。
 %[text] > **所以這裡該修的不是提示詞。** 換更大的骨幹、
-%[text] > 調 `Threshold`、寫更好的英文——全都只能動那 15%。
+%[text] > 調 `Threshold`、寫更好的英文——全都動不了這個數字。
+%[text] > **R2026a 量到的是 15% / 85%**：② 的 Jaccard 是 0.517，比 ① 好一點。
+%[text] > 換到 R2026b 之後，SAM 對這兩個差 3 像素的框（IoU 0.904）輸出幾乎一樣的遮罩。
+%[text] > **比例變了，結論沒變，而且更強了**：這個場景的瓶頸完全在遮罩，不在框。
 %[text] 為什麼 SAM 在這麼簡單的圖形上這麼差？合理的推測是
 %[text] **它的訓練分布裡沒有這種東西**：純色幾何圖形、
 %[text] 硬邊界、無紋理、而且是從 32×32 放大 8 倍來的
 %[text] （所以邊緣是階梯狀的）。SAM 學的是自然影像。
 %[text] > **基礎模型在它的分布之外會安靜地退化**——
 %[text] > 這和第 12 章「預設 NIQE 在工業影像上把好壞排反」是同一件事。
-%[text] 順便注意 **BFscore 的排序和 Jaccard／Dice 相反**：
+%[text] 順便一提：在 R2026a，**BFscore 的排序和 Jaccard／Dice 相反**——
 %[text] VLM 的框反而 BFscore 較高（0.7785 vs 0.7193）。
 %[text] BFscore 量的是**邊界**的吻合度，Jaccard 量的是**面積**的重疊。
-%[text] **又一次兩個指標給出相反排序**——這次是在同一個加分題裡。
+%[text] 在 R2026b，兩個框的遮罩幾乎相同，三個指標都打平，這個反向排序就消失了。
+%[text] > **建立在微小差距上的排序，換個版本就可能不見。**
+%[text] > 寫報告時，差距小於「重跑或換版本的變動」的排序，不要當成結論。
 %[text] **第 5 小題：誤差是框的誤差還是遮罩的誤差？**
 %[text] **把兩者分開的方法就是上面做的那件事**：
 %[text:table]

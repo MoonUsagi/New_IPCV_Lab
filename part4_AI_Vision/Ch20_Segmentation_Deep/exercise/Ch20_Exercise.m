@@ -35,10 +35,12 @@ rng(0);
 %[text] 2. 把它的輸出寫成 PNG，建 `pixelLabelDatastore`，
 %[text]    用 `evaluateSemanticSegmentation` 評估
 %[text] 3. 做一張表比較三者：
-%[text]    | 方法 | GlobalAccuracy | MeanIoU | **triangle 的 IoU** |
-%[text]    |---|---|---|---|
-%[text]    | 全部猜背景 | 0.9538 | 0.4769 | **0** |
-%[text]    | 你的門檻分割 | ? | ? | ? |
+%[text:table]
+%[text] | 方法 | GlobalAccuracy | MeanIoU | **triangle 的 IoU** |
+%[text] | --- | --- | --- | --- |
+%[text] | 全部猜背景 | 0.9538 | 0.4769 | **0** |
+%[text] | 你的門檻分割 | ? | ? | ? |
+%[text:table]
 %[text] 4. 回答：哪一個指標最能反映「第二個方法真的有用」？
 %[text] 5. 回答：**這個任務需要深度學習嗎？** \
 %[text] **第 5 點要誠實。** `triangleImages` 是純色三角形配純色背景——
